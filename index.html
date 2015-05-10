@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> DSL </title>
+	<meta charset='utf8' />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="http://cdn.bootcss.com/jquery-mobile/1.4.5/jquery.mobile.min.css" rel="stylesheet">
+	<script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+	<script src="http://cdn.bootcss.com/jquery-mobile/1.4.5/jquery.mobile.min.js"></script>
+	<script src="http://cdn.bootcss.com/pegjs/0.7.0/peg.min.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+
+	var parser = null;
+
+	$.get('rule.txt', function(data){
+		parser = PEG.buildParser(data);
+	});
+
+	function createTable(obj){
+		if(obj instanceof Array){
+			var table = $('<table>');
+			table.attr('data-role', 'table');
+			table.addClass('ui-body-d ui-shadow table-stripe ui-responsive');
+			for(var i=0; i<obj.length; i++){
+				var e = obj[i];
+
+				if(e == null || e == undefined)
+					continue;
+
+				if(typeof e == 'string'){
+					continue;
+				}
+
+				if(e instanceof Object){
+					var row = $('<tr>');
+					var type_cell = $('<th>').text(e.type);
+					var value_cell = $('<td>');
+
+					if(e.value instanceof Array)
+						value_cell.append(createTable(e.value));
+					else
+						value_cell.text(e.value);
+
+					row.append(type_cell).append(value_cell);
+
+					table.append(row);					
+				}
+			}
+
+			return table;
+		}
+	}
+
+	function startParse(){
+		var text = $('#input').val();
+		try{
+			var result = parser.parse(text);
+			var output = $('#output');
+
+			output.empty();
+			output.append(createTable(result));
+
+		}catch(e){
+			var x = e.toString();
+			var r = /\\u([\d\w]{4})/gi;
+			x = x.replace(r, function (match, grp) {
+			    return String.fromCharCode(parseInt(grp, 16)); } );
+			x = unescape(x);
+			alert("解析出错！" + x);
+		}
+	}
+
+</script>
+
+
+<div data-role="page">
+
+	<div data-role="header">
+		<h1> 太阳神三国杀 DSL 在线解析器</h1>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content">
+		<label for="input"> DSL :</label>
+		<textarea cols="40" rows="8" name="input" id="input">当你受到伤害后,你可以获得造成此伤害的牌。</textarea>
+		<button onclick="startParse()" > 开始解析 </button>
+		<label for='output'> 输出: </label>
+		<div id='output' class='ui-content'>
+		</div>
+
+	</div>
+
+	<div data-role="footer">
+		<h4> Powered by <a href='https://jquerymobile.com/'>jQuery Mobile</a> &amp; <a href='http://pegjs.org/'>pegjs</a></h4>
+	</div>
+
+</div>
+
+
+</body>
+</html>
