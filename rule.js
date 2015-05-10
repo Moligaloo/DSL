@@ -12,7 +12,17 @@
 }
 
 skill =
-	condition comma statements period?
+	skill_spec condition comma statements period?
+
+skill_spec =
+	skill_type:skill_type* {
+		return pair('技能类型', skill_type);
+	}
+
+skill_type =
+	type:('主公技' / '锁定技' / '限定技' / '觉醒技') comma{
+		return type;
+	}
 
 condition =
 	when:when target:target happened:happened {
@@ -73,10 +83,14 @@ card =
 
 // punctuation
 comma =
-	"," / "，"
+	("," / "，"){
+		return undefined;
+	}
 
 period =
-	"。"
+	"。"{
+		return undefined;
+	}
 
 // end
 

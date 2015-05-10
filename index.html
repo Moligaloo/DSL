@@ -31,7 +31,7 @@
 					continue;
 
 				if(typeof e == 'string'){
-					continue;
+					table.append($('<tr>').append($('<td>').text(e)));
 				}
 
 				if(e instanceof Object){
