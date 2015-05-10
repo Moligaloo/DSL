@@ -53,10 +53,26 @@ statement =
 action = 
 	verb:verb object:object?{
 		return [
+			pair('类型', '普通动作'),
 			pair('动词',verb),
 			pair('宾语',object)
 		];
+	} /
+	'令' target:target action:action{
+		return [
+			pair('类型', '使动动作'),
+			pair('使动对象', target), 
+			pair('使动动作', action)
+		];
+	} /
+	'选择' decision:decision{
+		return [
+			pair('决定', decision)
+		];
 	}
+
+decision = 
+	'是否打出【闪】'
 
 object =
 	modifier:modifier? '的'? something:something{
@@ -67,7 +83,7 @@ object =
 	}
 
 modal_verb =
-	'可以' / '必须'
+	'可以' / '必须' / '须'
 
 verb = 
 	'获得'
@@ -103,10 +119,32 @@ when =
 	'当'
 
 target =
-	you
+	you /
+	lord / 
+	modifier: player_modifier* '角色' {
+		return pair('修饰', modifier);
+	}
 
 you = 
 	'你'
+
+lord = 
+	'主公'
+
+player_modifier =
+	kingdom_specifier / other
+
+other = 
+	'其他'
+
+kingdom_specifier = 
+	kingdom:kingdom '势力' {
+		return '势力=' + kingdom;
+	}
+
+kingdom = 
+	'魏' / '蜀' / '吴' / '群'
+
 
 happened =
 	"受到伤害后" / '需要使用/打出【闪】时'

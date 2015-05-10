@@ -24,6 +24,8 @@
 		skills = data;
 
 		var select = $('#skills');
+		select.empty();
+
 		for (var i = 0; i < skills.length; i++) {
 			var skill = skills[i];
 			var option = $('<option>');
@@ -109,6 +111,7 @@
 		<div class="ui-field-contain">
 		    <label for="skills">已有技能:</label>
 		    <select name="skills" id="skills" onchange="changeSkill(event)">
+				<option value="0">护驾</option>
 		    </select>
 		</div>
 
