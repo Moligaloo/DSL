@@ -39,7 +39,7 @@ statements =
 	statements: statement+ { return pair('执行效果', statements);}
 
 statement =
-	subject:target modal_verb:modal_verb? action:action {
+	subject:target modal_verb:modal_verb? action:action comment*{
 		return pair(
 			'语句',
 			[
@@ -81,6 +81,11 @@ modifier =
 card =
 	'牌'
 
+card_name =
+	'【' name:[^】] '】'{
+		return pair('卡牌名', name);
+	}
+
 // punctuation
 comma =
 	("," / "，"){
@@ -104,4 +109,9 @@ you =
 	'你'
 
 happened =
-	"受到伤害后"
+	"受到伤害后" / '需要使用/打出【闪】时'
+
+comment = 
+	( ('(' / '(') [^)]* (')' / '）') ){
+		return undefined;
+	}
