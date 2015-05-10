@@ -14,9 +14,26 @@
 <script type="text/javascript">
 
 	var parser = null;
+	var skills = null;
 
 	$.get('rule.txt', function(data){
 		parser = PEG.buildParser(data);
+	});
+
+	$.get('skills.json', function(data){
+		skills = data;
+
+		var select = $('#skills');
+		for (var i = 0; i < skills.length; i++) {
+			var skill = skills[i];
+			var option = $('<option>');
+			option.text(skill.name);
+			option.attr('value', i);
+
+			select.append(option);
+		};
+
+		$('#input').text(skills[1].content);
 	});
 
 	function createTable(obj){
@@ -41,6 +58,8 @@
 
 					if(e.value instanceof Array)
 						value_cell.append(createTable(e.value));
+					else if(e.value instanceof Object)
+						value_cell.text(e.value.type + '(' + e.value.value + ')');
 					else
 						value_cell.text(e.value);
 
@@ -73,6 +92,10 @@
 		}
 	}
 
+	function changeSkill(event){
+		$('#input').text(skills[event.target.selectedIndex].content);
+	}
+
 </script>
 
 
@@ -83,8 +106,14 @@
 	</div><!-- /header -->
 
 	<div role="main" class="ui-content">
+		<div class="ui-field-contain">
+		    <label for="skills">已有技能:</label>
+		    <select name="skills" id="skills" onchange="changeSkill(event)">
+		    </select>
+		</div>
+
 		<label for="input"> DSL :</label>
-		<textarea cols="40" rows="8" name="input" id="input">当你受到伤害后,你可以获得造成此伤害的牌。</textarea>
+		<textarea cols="40" rows="8" name="input" id="input"></textarea>
 		<button onclick="startParse()" > 开始解析 </button>
 		<label for='output'> 输出: </label>
 		<div id='output' class='ui-content'>
