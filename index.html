@@ -75,7 +75,7 @@
 		if(obj == null || obj == undefined)
 			return null;
 
-		if(typeof obj == 'string')
+		if(typeof obj == 'string' || typeof obj == 'number')
 			return $('<td>').text(obj);
 
 		if(obj instanceof Object && obj.type && obj.value){

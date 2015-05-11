@@ -87,7 +87,13 @@ option =
 	}
 
 number = 
-	[1-9]
+	number:[1-9] {
+		return Number.parseInt(number);
+	} / 
+	number:[一二三四五六七八九十] {
+		var numbers = "一二三四五六七八九十";
+		return numbers.indexOf(number)+1;
+	}
 
 decision = 
 	'是否打出【闪】'
