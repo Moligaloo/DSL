@@ -71,10 +71,6 @@
 		setSkillWithIndex(default_index);
 	});
 
-	function selectSkill(event){
-
-	}
-
 	function createTable(obj){
 		if(obj == null || obj == undefined)
 			return null;
@@ -118,8 +114,6 @@
 	}
 
 	function setSkillWithIndex(i){
-		console.log(i);
-
 		$('#skillName').text(skills[i].name);
 		$('#input').text(skills[i].content);
 	}
