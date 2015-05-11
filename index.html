@@ -23,6 +23,11 @@
 	.null { color: magenta; }
 	.key { color: red; }
 
+	table{
+		border-style: solid;
+		border-width: 1px;
+	}
+
 </style>
 
 <script type="text/javascript">
@@ -38,51 +43,58 @@
 	$.get('skills.json', function(data){
 		skills = data;
 
-		var select = $('#skills');
-		select.empty();
+		var default_index = 0;
+
+		var skillList = $('#skillList');
 
 		for (var i = 0; i < skills.length; i++) {
 			var skill = skills[i];
-			var option = $('<option>');
-			option.text(skill.name);
-			option.attr('value', i);
 
-			select.append(option);
+			skillList.append(			
+				$('<li>').append(
+					$('<a>').text(skill.name)
+					.attr('skillIndex', i)
+					.attr('data-role', 'button')
+					.attr('data-rel', 'back')
+					.addClass('ui-btn')
+					.click(function(event){
+						var index = $(event.target).attr('skillIndex');
+						setSkillWithIndex(index);
+					})
+				)
+			);
+
+			if("default" in skill)
+				default_index = i;
 		};
 
-		$('#input').text(skills[1].content);
+		setSkillWithIndex(default_index);
 	});
 
+	function selectSkill(event){
+
+	}
+
 	function createTable(obj){
+		if(obj == null || obj == undefined)
+			return null;
+
+		if(typeof obj == 'string')
+			return $('<td>').text(obj);
+
+		if(obj instanceof Object && obj.type && obj.value){
+			return $('<tr>').append($('<th>').text(obj.type)).append(createTable(obj.value));
+		}
+
 		if(obj instanceof Array){
 			var table = $('<table>');
-			table.attr('data-role', 'table');
-			table.addClass('ui-body-d ui-shadow table-stripe ui-responsive');
+			table.addClass('ui-responsive');
 			for(var i=0; i<obj.length; i++){
 				var e = obj[i];
 
-				if(e == null || e == undefined)
-					continue;
-
-				if(typeof e == 'string'){
-					table.append($('<tr>').append($('<td>').text(e)));
-				}
-
-				if(e instanceof Object){
-					var row = $('<tr>');
-					var type_cell = $('<th>').text(e.type);
-					var value_cell = $('<td>');
-
-					if(e.value instanceof Array)
-						value_cell.append(createTable(e.value));
-					else if(e.value instanceof Object)
-						value_cell.text(e.value.type + '(' + e.value.value + ')');
-					else
-						value_cell.text(e.value);
-
-					row.append(type_cell).append(value_cell);
-
-					table.append(row);					
+				var row = createTable(e);
+				if(row){
+					table.append(row);
 				}
 			}
 
@@ -105,8 +117,11 @@
 		}
 	}
 
-	function changeSkill(event){
-		$('#input').text(skills[event.target.selectedIndex].content);
+	function setSkillWithIndex(i){
+		console.log(i);
+
+		$('#skillName').text(skills[i].name);
+		$('#input').text(skills[i].content);
 	}
 
 	// code copied from http://stackoverflow.com/questions/4810841/how-can-i-pretty-print-json-using-javascript
@@ -156,11 +171,16 @@
 	</div><!-- /header -->
 
 	<div role="main" class="ui-content">
-		<div class="ui-field-contain">
+		<div>
 		    <label for="skills">已有技能:</label>
-		    <select name="skills" id="skills" onchange="changeSkill(event)">
-				<option value="0">护驾</option>
-		    </select>
+
+			<a href="#skillMenu" 
+				data-rel="popup" data-transition="slideup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-gear ui-btn-icon-left ui-btn-a"> <span id='skillName'> 选择技能 </span></a>
+
+			<div data-role="popup" id="skillMenu">
+				<ul data-role="listview" id='skillList' data-inset="true" style="min-width:210px;">
+			    </ul>
+			</div>
 		</div>
 
 		<label for="input"> DSL :</label>

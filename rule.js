@@ -69,7 +69,25 @@ action =
 		return [
 			pair('决定', decision)
 		];
+	} /
+	'选择一项' colon? options:option+{
+		return [
+			pair('类型', '作出选择'),
+			pair('可选项', options)
+		];
 	}
+
+option =
+	number:number "." action:action (semicolon / period) {
+		return [
+			pair('类型','选项'),
+			pair('序号', number),
+			pair('动作', action)
+		];
+	}
+
+number = 
+	[1-9]
 
 decision = 
 	'是否打出【闪】'
@@ -86,10 +104,13 @@ modal_verb =
 	'可以' / '必须' / '须'
 
 verb = 
-	'获得'
+	'获得' / '摸'
 
 something =
-	card
+	card_modifier? card
+
+card_modifier =
+	'一张'
 
 modifier =
 	'造成此伤害'
@@ -110,6 +131,16 @@ comma =
 
 period =
 	"。"{
+		return undefined;
+	}
+
+semicolon =
+	(";" / '；') {
+		return undefined;
+	}
+
+colon =
+	(':' / '：') {
 		return undefined;
 	}
 
