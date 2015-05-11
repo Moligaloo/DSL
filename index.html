@@ -11,10 +11,25 @@
 </head>
 <body>
 
+<style type="text/css">
+	
+	/*
+	used to highlight JSON output
+	*/
+	pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+	.string { color: green; }
+	.number { color: darkorange; }
+	.boolean { color: blue; }
+	.null { color: magenta; }
+	.key { color: red; }
+
+</style>
+
 <script type="text/javascript">
 
 	var parser = null;
 	var skills = null;
+	var result = null;
 
 	$.get('rule.txt', function(data){
 		parser = PEG.buildParser(data);
@@ -78,12 +93,8 @@
 	function startParse(){
 		var text = $('#input').val();
 		try{
-			var result = parser.parse(text);
-			var output = $('#output');
-
-			output.empty();
-			output.append(createTable(result));
-
+			result = parser.parse(text);
+			showTable();
 		}catch(e){
 			var x = e.toString();
 			var r = /\\u([\d\w]{4})/gi;
@@ -96,6 +107,43 @@
 
 	function changeSkill(event){
 		$('#input').text(skills[event.target.selectedIndex].content);
+	}
+
+	// code copied from http://stackoverflow.com/questions/4810841/how-can-i-pretty-print-json-using-javascript
+	function syntaxHighlight(json) {
+	    if (typeof json != 'string') {
+	         json = JSON.stringify(json, undefined, 2);
+	    }
+	    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+	        var cls = 'number';
+	        if (/^"/.test(match)) {
+	            if (/:$/.test(match)) {
+	                cls = 'key';
+	            } else {
+	                cls = 'string';
+	            }
+	        } else if (/true|false/.test(match)) {
+	            cls = 'boolean';
+	        } else if (/null/.test(match)) {
+	            cls = 'null';
+	        }
+	        return '<span class="' + cls + '">' + match + '</span>';
+	    });
+	}
+
+	function showJSON(){
+		$('#output').empty().append($('<pre>').html(syntaxHighlight(result)));
+
+		$('#showJSONLink').hide();
+		$('#showTableLink').show();
+	}
+
+	function showTable(){
+		$('#output').empty().append(createTable(result));
+
+		$('#showJSONLink').show();
+		$('#showTableLink').hide();
 	}
 
 </script>
@@ -118,7 +166,10 @@
 		<label for="input"> DSL :</label>
 		<textarea cols="40" rows="8" name="input" id="input"></textarea>
 		<button onclick="startParse()" > 开始解析 </button>
-		<label for='output'> 输出: </label>
+		<label for='output'> 输出 (
+			<a id='showJSONLink' onclick="showJSON()">JSON </a> 
+			<a id='showTableLink' onclick="showTable()" style='display:none'> 表格</a>
+		): </label>
 		<div id='output' class='ui-content'>
 		</div>
 
