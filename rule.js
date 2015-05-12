@@ -1,22 +1,10 @@
-{
-	function pair(type,value){
-		if(value){
-			return {
-				'type':type,
-				'value':value,
-			};
-		}else{
-			return null;
-		}
-	}
-}
-
 skill =
-	skill_spec condition comma statements period?
-
-skill_spec =
-	skill_type:skill_type* {
-		return pair('技能类型', skill_type);
+	skill_spec:skill_type* condition:condition? statements:statements{
+		return {
+			"技能类型": skill_spec,
+			"发动条件": condition,
+			"执行效果": statements
+		};
 	}
 
 skill_type =
@@ -25,84 +13,95 @@ skill_type =
 	}
 
 condition =
-	when:when target:target happened:happened {
-		return pair(
-			'发动条件', 
-			[
-				pair('目标', target),
-				pair('事件', happened)
-			]
-		);
-	}
+	when:when target:target event:event comma? {
+		return {
+			"目标": target,
+			"事件": event
+		};
+	} 
 
 statements =
-	statements: (statement comment* comma?)+ { 
-		return pair('执行效果', statements);
+	statements:statement_with_comment+ period? { 
+		return statements;
+	}
+
+statement_with_comment = 
+	statement:statement comment* comma?{
+		return statement;
 	}
 
 statement =
-	subject:target modal_verb:modal_verb? action:action{
-		return pair(
-			'普通语句',
-			[
-				pair('主语', subject),
-				pair('情态', modal_verb),
-				pair('动作', action),
-			]
-		);
+	'然后' statement:statement{
+		return statement;
 	} /
-	if_condition_statement /
-	'然后' action:action {
-		return pair(
-			'然后语句',
-			[
-				pair('动作', action)
-			]
-		);
+	subject:target? modal_verb:modal_verb? action:action{
+		return {
+			"语句类型":"普通语句",
+			"主语":subject,
+			"情态":modal_verb,
+			"动作":action
+		};
+	} /
+	'若' if_condition:if_condition {
+		return {
+			"语句类型":"条件语句",
+			"条件": if_condition
+		};
+	} /
+	from:target '与' to:target '的距离' modify:distance_modify{
+		return {
+			"语句类型":'距离修正',
+			"源":from,
+			"目标":to,
+			"修正":modify
+		};
 	}
 
-if_condition_statement =
-	'若' if_condition:if_condition {
-		return pair('条件语句', [pair('条件', if_condition)]);
-	}
+distance_modify =
+	sign:[+-] number:number {
+		return {
+			"符号":sign,
+			"数值":number
+		};
+	}	
 	
 if_condition =
 	'至少一名其他角色的区域里有牌'
 
 action = 
 	verb:verb object:object?{
-		return [
-			pair('类型', '普通动作'),
-			pair('动词',verb),
-			pair('宾语',object)
-		];
+		return {
+			"动作类型":"普通动作",
+			"动词":verb,
+			"宾语":object
+		};
 	} /
 	'令' target:target action:action{
-		return [
-			pair('类型', '使动动作'),
-			pair('使动对象', target), 
-			pair('使动动作', action)
-		];
+		return {
+			"动作类型":"使动动作",
+			"对象":target,
+			"动作":action
+		};
 	} /
 	'选择' decision:decision{
-		return [
-			pair('决定', decision)
-		];
+		return {
+			"动作类型":"选择动作",
+			"决定":decision
+		};
 	} /
 	'选择一项' colon? options:option+{
-		return [
-			pair('类型', '作出选择'),
-			pair('可选项', options)
-		];
+		return {
+			"动作类型":"多选动作",
+			"可选项":options
+		}
 	}
 
 option =
 	number:number "." action:action (semicolon / period) {
-		return [
-			pair('类型','选项'),
-			pair('序号', number),
-			pair('动作', action)
-		];
+		return {
+			"序号":number,
+			"动作":action
+		};
 	}
 
 number = 
@@ -118,11 +117,11 @@ decision =
 	'是否打出【闪】'
 
 object =
-	modifier:modifier? '的'? something:something{
-		return [
-			pair('修饰', modifier),
-			pair('对象', something)
-		];
+	card_modifier:card_modifier? '的'? '牌'{
+		return {
+			"对象类型":"卡牌",
+			"修饰":card_modifier
+		};
 	}
 
 modal_verb =
@@ -131,44 +130,26 @@ modal_verb =
 verb = 
 	'获得' / '摸' / '翻面'
 
-something =
-	card_modifier? card /
-	'每名其他角色区域里的一张牌'
-
 card_modifier =
-	'一张'
-
-modifier =
-	'造成此伤害'
-
-card =
-	'牌'
+	'一张' / '每名其他角色区域里的一张' / '造成此伤害'	
 
 card_name =
 	'【' name:[^】] '】'{
-		return pair('卡牌名', name);
+		return {'卡牌名':name};
 	}
 
 // punctuation
 comma =
-	("," / "，"){
-		return undefined;
-	}
+	"," / "，"
 
 period =
-	"。"{
-		return undefined;
-	}
+	"。"
 
 semicolon =
-	(";" / '；') {
-		return undefined;
-	}
+	";" / '；'
 
 colon =
-	(':' / '：') {
-		return undefined;
-	}
+	':' / '：'
 
 // end
 
@@ -176,42 +157,66 @@ when =
 	'当'
 
 target =
-	you /
-	lord / 
-	modifier: player_modifier* '角色' {
-		return pair('修饰', modifier);
+	you:'你' {
+		return {
+			"角色类型":"你"
+		};
+	} /
+	lord:'主公' {
+		return {
+			"角色类型":"主公"
+		};
+	} /
+	player_modifiers:player_modifier+ '角色' {
+		return {
+			"角色类型":"普通角色",
+			"修饰":player_modifiers
+		};
 	}
 
-you = 
-	'你'
-
-lord = 
-	'主公'
-
 player_modifier =
-	kingdom_specifier / other
-
-other = 
-	'其他'
-
-kingdom_specifier = 
 	kingdom:kingdom '势力' {
-		return '势力=' + kingdom;
+		return {
+			"角色修饰":"势力限定",
+			"势力":kingdom
+		};
+	} /
+	'其他' {
+		return {
+			"角色修饰":"排除限定"
+		};
 	}
 
 kingdom = 
 	'魏' / '蜀' / '吴' / '群'
 
-
-happened =
-	"受到" damage_modifier* "伤害后" {
-
-	} / '需要使用/打出【闪】时'
+event =
+	event:("受到伤害后" / '需要使用/打出【闪】时') {
+		return {
+			"事件类型":event,
+		}
+	} /
+	"受到" damage_modifier:damage_modifier "伤害后" {
+		return {
+			"事件类型":"受到伤害后",
+			"修饰":damage_modifier
+		}
+	}
 
 damage_modifier =
-	number '点'
+	number:number '点' {
+		return {
+			"修饰类型":"伤害修饰",
+			"伤害点数":number
+		};
+	}
 
 comment = 
-	( ('(' / '(') [^)]* (')' / '）') ){
-		return undefined;
-	}
+	comment_start [^)）]* comment_end
+
+comment_start =
+	'(' / '（'
+
+comment_end =
+	')' / '）'
+

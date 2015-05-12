@@ -28,6 +28,10 @@
 		border-width: 1px;
 	}
 
+	.omit{
+		color: gray;
+	}
+
 </style>
 
 <script type="text/javascript">
@@ -75,12 +79,16 @@
 		if(obj == null || obj == undefined)
 			return null;
 
-		if(typeof obj == 'string' || typeof obj == 'number')
-			return $('<td>').text(obj);
-
-		if(obj instanceof Object && obj.type && obj.value){
-			return $('<tr>').append($('<th>').text(obj.type)).append(createTable(obj.value));
+		if(typeof obj == 'string'){
+			if(obj == ''){
+				return $('<td>').append($('<i>').text('省略').addClass('omit'));
+			}else{
+				return $('<td>').text(obj);
+			}
 		}
+
+		if(typeof obj == 'number')
+			return $('<td>').append($('<b>').text(obj).addClass('number'));
 
 		if(obj instanceof Array){
 			var table = $('<table>');
@@ -91,6 +99,19 @@
 				if(row){
 					table.append(row);
 				}
+			}
+
+			return table;
+		}
+
+		if(obj instanceof Object){
+			var table = $('<table>');
+			for(var name in obj){
+				var type_cell = $('<th>').text(name);
+				var value_cell = $('<td>').append(createTable(obj[name]));
+
+				var row = $('<tr>').append(type_cell).append(value_cell);
+				table.append(row);
 			}
 
 			return table;
