@@ -36,19 +36,38 @@ condition =
 	}
 
 statements =
-	statements: statement+ { return pair('执行效果', statements);}
+	statements: (statement comment* comma?)+ { 
+		return pair('执行效果', statements);
+	}
 
 statement =
-	subject:target modal_verb:modal_verb? action:action comment*{
+	subject:target modal_verb:modal_verb? action:action{
 		return pair(
-			'语句',
+			'普通语句',
 			[
 				pair('主语', subject),
 				pair('情态', modal_verb),
 				pair('动作', action),
 			]
 		);
+	} /
+	if_condition_statement /
+	'然后' action:action {
+		return pair(
+			'然后语句',
+			[
+				pair('动作', action)
+			]
+		);
 	}
+
+if_condition_statement =
+	'若' if_condition:if_condition {
+		return pair('条件语句', [pair('条件', if_condition)]);
+	}
+	
+if_condition =
+	'至少一名其他角色的区域里有牌'
 
 action = 
 	verb:verb object:object?{
@@ -110,10 +129,11 @@ modal_verb =
 	'可以' / '必须' / '须'
 
 verb = 
-	'获得' / '摸'
+	'获得' / '摸' / '翻面'
 
 something =
-	card_modifier? card
+	card_modifier? card /
+	'每名其他角色区域里的一张牌'
 
 card_modifier =
 	'一张'
@@ -184,7 +204,12 @@ kingdom =
 
 
 happened =
-	"受到伤害后" / '需要使用/打出【闪】时'
+	"受到" damage_modifier* "伤害后" {
+
+	} / '需要使用/打出【闪】时'
+
+damage_modifier =
+	number '点'
 
 comment = 
 	( ('(' / '(') [^)]* (')' / '）') ){
