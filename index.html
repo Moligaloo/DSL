@@ -91,6 +91,10 @@
 			return $('<td>').append($('<b>').text(obj).addClass('number'));
 
 		if(obj instanceof Array){
+			if(obj.length == 0){
+				return $('<td>').append($('<i>').text('无').addClass('omit'));
+			}
+
 			var table = $('<table>');
 			for(var i=0; i<obj.length; i++){
 				var e = obj[i];
