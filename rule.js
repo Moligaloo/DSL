@@ -13,7 +13,7 @@ skill_type =
 	}
 
 condition =
-	when:when player:player event:event comma? {
+	when:when? player:player? event:event comma? {
 		return {
 			"目标": player,
 			"事件": event
@@ -26,7 +26,7 @@ statements =
 	}
 
 statement_with_comment = 
-	statement:statement comment* comma?{
+	statement:statement comment* (comma/semicolon)?{
 		return statement;
 	}
 
@@ -34,18 +34,31 @@ statement =
 	'然后' statement:statement{
 		return statement;
 	} /
-	subject:player? modal_verb:modal_verb? action:action{
+	subject:player? ('必须'/'须')? action:action{
 		return {
 			"语句类型":"普通语句",
 			"主语":subject,
-			"情态":modal_verb,
 			"动作":action
+		};
+	} /
+	subject:player? '可以' action:action{
+		return {
+			'语句类型':"可选执行语句",
+			'主语':subject,
+			'动作':action
 		};
 	} /
 	'若' if_condition:if_condition {
 		return {
 			"语句类型":"条件语句",
 			"条件": if_condition
+		};
+	} /
+	card_class:card_class {
+		return {
+			"语句类型":"条件判断",
+			"条件": "此前提到的牌为固定类型",
+			"类型":card_class
 		};
 	} /
 	from:player '与' to:player '的距离' modify:distance_modify{
@@ -69,20 +82,42 @@ if_condition =
 	'至少一名其他角色的区域里有牌' /
 	player:player player_property:player_property compare_op:compare_op property_value:property_value{
 		return {
-			"判断类型":"属性判断",
+			"判断类型":"角色属性判断",
 			"对象":player,
 			"属性":player_property,
 			"判断符":compare_op,
 			"值":property_value
 		};
+	} /
+	'此牌' kind_op:kind_op card_class:card_class{
+		return {
+			"判断类型":"卡牌类别判断",
+			"对象":'之前提到的卡牌',
+			"判断符":kind_op,
+			"类别":card_class
+		}
 	}
 
 player_property = 
 	'体力值'
 
+kind_op =
+	'为' {
+		return '=';
+	} /
+	'不为' {
+		return '!=';
+	}
+
+card_class = 
+	'装备牌' / '武器牌' / '防具牌' / '坐骑牌'
+
 compare_op = 
 	'为' {
 		return '=';
+	} /
+	'不为' {
+		return '!=';
 	} /
 	"大于" {
 		return '>'
@@ -99,6 +134,12 @@ property_value =
 	}
 
 action = 
+	'回复' number:number '点体力' {
+		return {
+			"动作类型":"恢复体力",
+			"恢复值": number
+		};
+	} /
 	verb:verb object:object?{
 		return {
 			"动作类型":"普通动作",
@@ -140,7 +181,7 @@ action =
 	} 
 
 placement = 
-	'置入弃牌堆'
+	'置入' ('弃牌堆' / '一名角色的装备区')
 
 option =
 	number:number "." action:action (semicolon / period) {
@@ -174,10 +215,7 @@ object =
 			"对象类型":"伤害",
 			"修饰":damage_modifier
 		}
-	}
-
-modal_verb =
-	'可以' / '必须' / '须'
+	} 
 
 verb = 
 	'获得' / '摸' / '翻面' / '弃置' / '防止'
@@ -188,7 +226,7 @@ card_modifier_with_de =
 	}
 
 card_modifier =
-	'一张' / '每名其他角色区域里的一张' / '造成此伤害' / '其中的' / '至少一张点数和不大于13' / '其余' / '装备'
+	'一张' / '每名其他角色区域里的一张' / '造成此伤害' / '其中的' / '至少一张点数和不大于13' / '其余' / '装备' / '其距离为1的一名角色的区域里的一张'
 
 card_name =
 	'【' name:[^】] '】'{
@@ -216,26 +254,26 @@ when =
 player =
 	you:'你' {
 		return {
-			"角色类型":"你"
+			"角色":"你"
 		};
 	} /
 	lord:'主公' {
 		return {
-			"角色类型":"主公"
+			"角色":"主公"
 		};
 	} /
 	player_modifiers:player_modifier+ '角色' {
 		return {
-			"角色类型":"普通角色",
+			"角色":"普通角色",
 			"修饰":player_modifiers
 		};
 	} /
 	'其'{
 		return {
-			"角色类型":"代词",
+			"角色":"代词",
 			"指代":"上一次提到的角色"
 		};
-	}
+	} 
 
 player_modifier =
 	kingdom:kingdom '势力' {
@@ -264,7 +302,17 @@ event =
 			"事件类型":"受到伤害后",
 			"修饰":damage_modifier
 		}
+	} /
+	phrase_name:phrase_name '阶段' endpoint:('开始'/'结束') '时'{
+		return {
+			'事件类型':'阶段',
+			'阶段':phrase_name,
+			'开始还是结束':endpoint
+		};
 	}
+
+phrase_name =
+	'准备' / '判定' / '摸牌' / '出牌' / '弃牌' / '结束'
 
 damage_modifier =
 	number:number '点' {
