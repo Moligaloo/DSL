@@ -94,7 +94,23 @@ action =
 			"动作类型":"多选动作",
 			"可选项":options
 		}
+	} /
+	'亮出牌堆顶的' number:number '张牌'{
+		return{
+			"动作类型":"亮出牌堆顶的牌",
+			"张数":number
+		};
+	} /
+	'将' object:object placement:placement{
+		return {
+			"动作类型":"卡牌处理",
+			"处理":placement,
+			"对象":object
+		}
 	}
+
+placement = 
+	'置入弃牌堆'
 
 option =
 	number:number "." action:action (semicolon / period) {
@@ -117,10 +133,10 @@ decision =
 	'是否打出【闪】'
 
 object =
-	card_modifier:card_modifier? '的'? '牌'{
+	card_modifiers:card_modifier_with_de* '牌'{
 		return {
 			"对象类型":"卡牌",
-			"修饰":card_modifier
+			"修饰":card_modifiers
 		};
 	}
 
@@ -130,8 +146,13 @@ modal_verb =
 verb = 
 	'获得' / '摸' / '翻面'
 
+card_modifier_with_de =
+	card_modifier:card_modifier '的'? {
+		return card_modifier;
+	}
+
 card_modifier =
-	'一张' / '每名其他角色区域里的一张' / '造成此伤害'	
+	'一张' / '每名其他角色区域里的一张' / '造成此伤害' / '其中的' / '至少一张点数和不大于13' / '其余'
 
 card_name =
 	'【' name:[^】] '】'{
