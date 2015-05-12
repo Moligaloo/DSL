@@ -106,7 +106,7 @@ option =
 
 number = 
 	number:[1-9] {
-		return Number.parseInt(number);
+		return parseInt(number);
 	} / 
 	number:[一二三四五六七八九十] {
 		var numbers = "一二三四五六七八九十";
