@@ -13,9 +13,9 @@ skill_type =
 	}
 
 condition =
-	when:when target:target event:event comma? {
+	when:when player:player event:event comma? {
 		return {
-			"目标": target,
+			"目标": player,
 			"事件": event
 		};
 	} 
@@ -34,7 +34,7 @@ statement =
 	'然后' statement:statement{
 		return statement;
 	} /
-	subject:target? modal_verb:modal_verb? action:action{
+	subject:player? modal_verb:modal_verb? action:action{
 		return {
 			"语句类型":"普通语句",
 			"主语":subject,
@@ -48,7 +48,7 @@ statement =
 			"条件": if_condition
 		};
 	} /
-	from:target '与' to:target '的距离' modify:distance_modify{
+	from:player '与' to:player '的距离' modify:distance_modify{
 		return {
 			"语句类型":'距离修正',
 			"源":from,
@@ -66,7 +66,37 @@ distance_modify =
 	}	
 	
 if_condition =
-	'至少一名其他角色的区域里有牌'
+	'至少一名其他角色的区域里有牌' /
+	player:player player_property:player_property compare_op:compare_op property_value:property_value{
+		return {
+			"判断类型":"属性判断",
+			"对象":player,
+			"属性":player_property,
+			"判断符":compare_op,
+			"值":property_value
+		};
+	}
+
+player_property = 
+	'体力值'
+
+compare_op = 
+	'为' {
+		return '=';
+	} /
+	"大于" {
+		return '>'
+	} /
+	"小于" {
+		return '<'
+	}
+
+property_value =
+	number:number {
+		return {
+			"数字":number
+		};
+	}
 
 action = 
 	verb:verb object:object?{
@@ -76,10 +106,10 @@ action =
 			"宾语":object
 		};
 	} /
-	'令' target:target action:action{
+	'令' player:player action:action{
 		return {
 			"动作类型":"使动动作",
-			"对象":target,
+			"对象":player,
 			"动作":action
 		};
 	} /
@@ -107,7 +137,7 @@ action =
 			"处理":placement,
 			"对象":object
 		}
-	}
+	} 
 
 placement = 
 	'置入弃牌堆'
@@ -138,13 +168,19 @@ object =
 			"对象类型":"卡牌",
 			"修饰":card_modifiers
 		};
+	} /
+	damage_modifier:damage_modifier '伤害'{
+		return {
+			"对象类型":"伤害",
+			"修饰":damage_modifier
+		}
 	}
 
 modal_verb =
 	'可以' / '必须' / '须'
 
 verb = 
-	'获得' / '摸' / '翻面'
+	'获得' / '摸' / '翻面' / '弃置' / '防止'
 
 card_modifier_with_de =
 	card_modifier:card_modifier '的'? {
@@ -152,7 +188,7 @@ card_modifier_with_de =
 	}
 
 card_modifier =
-	'一张' / '每名其他角色区域里的一张' / '造成此伤害' / '其中的' / '至少一张点数和不大于13' / '其余'
+	'一张' / '每名其他角色区域里的一张' / '造成此伤害' / '其中的' / '至少一张点数和不大于13' / '其余' / '装备'
 
 card_name =
 	'【' name:[^】] '】'{
@@ -177,7 +213,7 @@ colon =
 when = 
 	'当'
 
-target =
+player =
 	you:'你' {
 		return {
 			"角色类型":"你"
@@ -192,6 +228,12 @@ target =
 		return {
 			"角色类型":"普通角色",
 			"修饰":player_modifiers
+		};
+	} /
+	'其'{
+		return {
+			"角色类型":"代词",
+			"指代":"上一次提到的角色"
 		};
 	}
 
@@ -212,7 +254,7 @@ kingdom =
 	'魏' / '蜀' / '吴' / '群'
 
 event =
-	event:("受到伤害后" / '需要使用/打出【闪】时') {
+	event:("受到伤害后" / '受到伤害时' / '需要使用/打出【闪】时') {
 		return {
 			"事件类型":event,
 		}
@@ -229,6 +271,12 @@ damage_modifier =
 		return {
 			"修饰类型":"伤害修饰",
 			"伤害点数":number
+		};
+	} /
+	'此' {
+		return {
+			"修饰类型":"伤害修饰",
+			"伤害指代":"之前提到的伤害"
 		};
 	}
 
