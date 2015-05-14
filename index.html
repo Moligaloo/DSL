@@ -87,7 +87,7 @@
 
 		if(typeof obj == 'string'){
 			if(obj == ''){
-				return $('<td>').append($('<i>').text('省略').addClass('omit'));
+				return $('<td>').text('省略').addClass('omit');
 			}else{
 				return $('<td>').text(obj);
 			}
@@ -135,6 +135,25 @@
 		x = unescape(x);
 
 		return x;
+	}
+
+	function regressionTest(){
+		var skillName = null;
+		try{
+			for (var i = 0; i < skills.length; i++) {
+				var skill = skills[i]
+				skillName = skill.name;
+				parser.parse(skill.content);
+			};
+
+			skillName = null;
+		}catch(e){
+			alert("检查技能失败，技能名:" + skillName);
+		}
+
+		if(skillName == null){
+			alert("检查成功！");
+		}
 	}
 
 	function startParse(){
@@ -226,7 +245,8 @@
 
 		<label for="input"> DSL :</label>
 		<textarea cols="40" rows="8" name="input" id="input"></textarea>
-		<button onclick="startParse()" > 开始解析 </button>
+		<button onclick="startParse()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-arrow-r ui-btn-icon-left ui-btn-a'> 开始解析 </button>
+		<button onclick="regressionTest()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a'> 回归测试 </button>
 		<div id='error-output' style='display:none'>
 			<p>解析出错:  <p>
 			期待的文本:
