@@ -281,7 +281,16 @@ card_modifier =
 			'卡牌修饰':'类型修饰',
 			'类型':card_class
 		};
+	} /
+	card_color:card_color {
+		return {
+			'卡牌修饰':'颜色修饰',
+			'颜色':card_color
+		};
 	}
+
+card_color =
+	'红色' / '黑色' / '无色'
 
 card_name =
 	'【' name:[^】] '】'{
@@ -369,6 +378,12 @@ event =
 			'事件类型':'阶段触发',
 			'哪个阶段':phrase_name,
 			'开始还是结束':endpoint
+		};
+	} /
+	'的' card_modifiers:card_modifier* '判定牌生效后' {
+		return {
+			'事件类型':'判定牌生效',
+			'判定牌修饰':card_modifiers
 		};
 	}
 
