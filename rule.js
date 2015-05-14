@@ -21,16 +21,19 @@ condition =
 	} 
 
 statements =
-	statements:statement_with_comment+ period? { 
+	statements:statement_with_punc+ period? { 
 		return statements;
 	}
 
-statement_with_comment = 
-	statement:statement comment* (comma/semicolon)?{
+statement_with_punc = 
+	statement:statement (comma/semicolon)?{
 		return statement;
 	}
 
 statement =
+	left_paren statement:statement right_paren{
+		return statement;
+	} /
 	'然后' statement:statement{
 		return statement;
 	} /
@@ -41,7 +44,7 @@ statement =
 			"动作":action
 		};
 	} /
-	subject:player? '可以' action:action{
+	subject:player? '可' '以'? action:action{
 		return {
 			'语句类型':"可选执行语句",
 			'主语':subject,
@@ -68,7 +71,25 @@ statement =
 			"目标":to,
 			"修正":modify
 		};
+	} /
+	var_name:var_name '为' player:player '的'? player_property:player_property{
+		return {
+			'语句类型':'变量定义',
+			'变量名':var_name,
+			'角色':player,
+			'属性':player_property
+		};
+	} /
+	original_thing:thing '视为' view_as_thing:thing{
+		return {
+			'语句类型':'视为语句',
+			'原始物件':original_thing,
+			'视为物件':view_as_thing
+		};
 	}
+
+thing =
+	'其打出的【闪】结算完毕后' / '你使用/打出此【闪】'
 
 distance_modify =
 	sign:[+-] number:number {
@@ -99,7 +120,7 @@ if_condition =
 	}
 
 player_property = 
-	'体力值'
+	'体力值' / '已损失的体力值'
 
 kind_op =
 	'为' {
@@ -110,7 +131,9 @@ kind_op =
 	}
 
 card_class = 
-	'装备牌' / '武器牌' / '防具牌' / '坐骑牌'
+	name:('装备' / '武器' / '防具' / '坐骑' ) '牌'{
+		return name;
+	}
 
 compare_op = 
 	'为' {
@@ -198,7 +221,16 @@ number =
 	number:[一二三四五六七八九十] {
 		var numbers = "一二三四五六七八九十";
 		return numbers.indexOf(number)+1;
+	} /
+	var_name:var_name{
+		return {
+			'数值类型':'变量',
+			'变量名':var_name
+		}
 	}
+
+var_name =
+	[A-Z]
 
 decision = 
 	'是否打出【闪】'
@@ -215,10 +247,14 @@ object =
 			"对象类型":"伤害",
 			"修饰":damage_modifier
 		}
-	} 
+	}
 
 verb = 
-	'获得' / '摸' / '翻面' / '弃置' / '防止'
+	'获得' /
+	'摸' / 
+	'翻面' / 
+	'弃置' / 
+	'防止' 
 
 card_modifier_with_de =
 	card_modifier:card_modifier '的'? {
@@ -226,9 +262,21 @@ card_modifier_with_de =
 	}
 
 card_modifier =
-	'所有' / '一张' / '每名其他角色区域里的一张' / 
-	'造成此伤害' / '其中的' / '至少一张点数和不大于13' / 
-	'其余' / '装备' / '其距离为1的一名角色的区域里的一张' / '其'
+	'所有' /
+	'每名其他角色区域里的' / 
+	'造成此伤害' / 
+	'其中的' / 
+	'至少一张点数和不大于13' / 
+	'其余' / 
+	'装备' /
+	'其距离为1的一名角色的区域里的一张' / 
+	'其' /
+	number:number '张' {
+		return {
+			'卡牌修饰':'数量修饰',
+			'数量':number
+		};
+	}
 
 card_name =
 	'【' name:[^】] '】'{
@@ -288,6 +336,12 @@ player_modifier =
 		return {
 			"角色修饰":"排除限定"
 		};
+	} /
+	number:number '名'{
+		return {
+			'角色修饰':"数量限定",
+			'数量':number
+		};
 	}
 
 kingdom = 
@@ -330,12 +384,9 @@ damage_modifier =
 		};
 	}
 
-comment = 
-	comment_start [^)）]* comment_end
-
-comment_start =
+left_paren =
 	'(' / '（'
 
-comment_end =
+right_paren =
 	')' / '）'
 
