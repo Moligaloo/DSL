@@ -57,7 +57,7 @@ statement =
 			"条件": if_condition
 		};
 	} /
-	card_class:card_class {
+	card_class:card_class '牌'{
 		return {
 			"语句类型":"条件判断",
 			"条件": "此前提到的牌为固定类型",
@@ -110,7 +110,7 @@ if_condition =
 			"值":property_value
 		};
 	} /
-	'此牌' kind_op:kind_op card_class:card_class{
+	'此牌' kind_op:kind_op card_class:card_class '牌'?{
 		return {
 			"判断类型":"卡牌类别判断",
 			"对象":'之前提到的卡牌',
@@ -131,7 +131,7 @@ kind_op =
 	}
 
 card_class = 
-	name:('装备' / '武器' / '防具' / '坐骑' ) '牌'{
+	name:('装备' / '武器' / '防具' / '坐骑' ){
 		return name;
 	}
 
@@ -195,16 +195,16 @@ action =
 			"张数":number
 		};
 	} /
-	'将' object:object placement:placement{
+	'将' object:object '置入' destination:destination{
 		return {
-			"动作类型":"卡牌处理",
-			"处理":placement,
+			"动作类型":"卡牌置入处理",
+			"目的地":destination,
 			"对象":object
-		}
+		};
 	} 
 
-placement = 
-	'置入' ('弃牌堆' / '一名角色的装备区')
+destination =
+	'弃牌堆' / '一名角色的装备区'
 
 option =
 	number:number "." action:action (semicolon / period) {
@@ -268,13 +268,18 @@ card_modifier =
 	'其中的' / 
 	'至少一张点数和不大于13' / 
 	'其余' / 
-	'装备' /
 	'其距离为1的一名角色的区域里的一张' / 
 	'其' /
 	number:number '张' {
 		return {
 			'卡牌修饰':'数量修饰',
 			'数量':number
+		};
+	} / 
+	card_class:card_class{
+		return {
+			'卡牌修饰':'类型修饰',
+			'类型':card_class
 		};
 	}
 

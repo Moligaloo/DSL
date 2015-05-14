@@ -18,7 +18,7 @@
 	*/
 	pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 	.string { color: green; }
-	.number { color: darkorange; }
+	.number { color: darkorange; font-weight: bold; }
 	.boolean { color: blue; }
 	.null { color: magenta; }
 	.key { color: red; }
@@ -30,6 +30,12 @@
 
 	.omit{
 		color: gray;
+		font-style: italic;
+	}
+
+	#bad-text{
+		color: red;
+		font-weight: bold;
 	}
 
 </style>
@@ -88,11 +94,11 @@
 		}
 
 		if(typeof obj == 'number')
-			return $('<td>').append($('<b>').text(obj).addClass('number'));
+			return $('<td>').text(obj).addClass('number');
 
 		if(obj instanceof Array){
 			if(obj.length == 0){
-				return $('<td>').append($('<i>').text('无').addClass('omit'));
+				return $('<td>').text('无').addClass('omit');
 			}
 
 			var table = $('<table>');
@@ -122,18 +128,35 @@
 		}
 	}
 
+	function unescape_unicode_text(x){
+		var r = /\\u([\d\w]{4})/gi;
+		x = x.replace(r, function (match, grp) {
+		    return String.fromCharCode(parseInt(grp, 16)); } );
+		x = unescape(x);
+
+		return x;
+	}
+
 	function startParse(){
 		var text = $('#input').val();
 		try{
 			result = parser.parse(text);
 			showTable();
+
+			$('#error-output').hide();
 		}catch(e){
-			var x = e.toString();
-			var r = /\\u([\d\w]{4})/gi;
-			x = x.replace(r, function (match, grp) {
-			    return String.fromCharCode(parseInt(grp, 16)); } );
-			x = unescape(x);
-			alert("解析出错！" + x);
+			$('#good-text').text(text.substring(0, e.offset));
+			$('#bad-text').text(text.substring(e.offset, e.offset+1));
+			$('#unparsed-text').text(text.substring(e.offset+1));
+
+			var expected = $('#expected');
+			expected.empty();
+			for (var i = 0; i < e.expected.length; i++) {
+				expected.append($('<li>').text(unescape_unicode_text(e.expected[i]))); 
+			};
+
+			$('#error-output').show();
+			$('#output').empty();
 		}
 	}
 
@@ -203,6 +226,17 @@
 
 		<label for="input"> DSL :</label>
 		<textarea cols="40" rows="8" name="input" id="input"></textarea>
+		<div id='error-output' style='display:none'>
+			<p>解析出错:  <p>
+			期待的文本:
+				<ol id='expected'>
+				</ol>
+			<p>
+				<span id="good-text"> </span>
+				<span id='bad-text'> </span>
+				<span id='unparsed-text'> </span>
+			</p> 
+		</div>
 		<button onclick="startParse()" > 开始解析 </button>
 		<label for='output'> 输出 (
 			<a id='showJSONLink' onclick="showJSON()">JSON </a> 
