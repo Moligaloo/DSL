@@ -26,7 +26,7 @@ statements =
 	}
 
 statement_with_punc = 
-	statement:statement (comma/semicolon)?{
+	statement:statement punctuation?{
 		return statement;
 	}
 
@@ -86,6 +86,9 @@ statement =
 			'原始物件':original_thing,
 			'视为物件':view_as_thing
 		};
+	} /
+	'若如此做' {
+		return undefined;
 	}
 
 thing =
@@ -131,7 +134,7 @@ kind_op =
 	}
 
 card_class = 
-	name:('装备' / '武器' / '防具' / '坐骑' ){
+	name:('装备' / '武器' / '防具' / '坐骑' / '锦囊'){
 		return name;
 	}
 
@@ -159,8 +162,22 @@ property_value =
 action = 
 	'回复' number:number '点体力' {
 		return {
-			"动作类型":"恢复体力",
+			"动作类型":"普通动作",
+			"动词":'回复',
 			"恢复值": number
+		};
+	} /
+	'翻面' {
+		return {
+			"动作类型":"普通动作",
+			'动词':'翻面'
+		};
+	} /
+	'使用' card:card{
+		return {
+			'动作类型':"普通动作",
+			'动词':'使用',
+			'宾语':card
 		};
 	} /
 	verb:verb object:object?{
@@ -236,12 +253,7 @@ decision =
 	'是否打出【闪】'
 
 object =
-	card_modifiers:card_modifier_with_de* '牌'{
-		return {
-			"对象类型":"卡牌",
-			"修饰":card_modifiers
-		};
-	} /
+	card /
 	damage_modifier:damage_modifier '伤害'{
 		return {
 			"对象类型":"伤害",
@@ -249,17 +261,42 @@ object =
 		}
 	}
 
+card =	
+	card_modifier:card_modifier* '的'? '牌' second_card:second_card? {
+		if(second_card == ''){
+			return {
+				'对象类型':'卡牌',
+				'卡牌限定':card_modifier
+			};
+		}else{
+			var card1_modifier = card_modifier.pop();
+			if(card1_modifier == undefined){
+				return {
+					'对象类型':'卡牌二元组',
+					'卡牌1限定':card_modifier,
+					'卡牌2限定':second_card['卡牌限定']
+				};				
+			}else{
+				return {
+					'对象类型':'卡牌二元组',
+					'共同限定':card_modifier,
+					'卡牌1限定':card1_modifier,
+					'卡牌2限定':second_card['卡牌限定']
+				};
+			}
+		}
+	}
+
+second_card =
+	'/' card:card {
+		return card;
+	}
+
 verb = 
 	'获得' /
 	'摸' / 
-	'翻面' / 
 	'弃置' / 
-	'防止' 
-
-card_modifier_with_de =
-	card_modifier:card_modifier '的'? {
-		return card_modifier;
-	}
+	'防止'
 
 card_modifier =
 	'所有' /
@@ -272,20 +309,26 @@ card_modifier =
 	'其' /
 	number:number '张' {
 		return {
-			'卡牌修饰':'数量修饰',
+			'卡牌限定':'数量限定',
 			'数量':number
 		};
 	} / 
 	card_class:card_class{
 		return {
-			'卡牌修饰':'类型修饰',
+			'卡牌限定':'类型限定',
 			'类型':card_class
 		};
 	} /
 	card_color:card_color {
 		return {
-			'卡牌修饰':'颜色修饰',
+			'卡牌限定':'颜色限定',
 			'颜色':card_color
+		};
+	} /
+	'场上' '的'? {
+		return {
+			'卡牌限定':'位置限定',
+			'位置':'场上'
 		};
 	}
 
@@ -297,7 +340,9 @@ card_name =
 		return {'卡牌名':name};
 	}
 
-// punctuation
+punctuation =
+	comma / period / semicolon / colon
+
 comma =
 	"," / "，"
 
@@ -362,7 +407,7 @@ kingdom =
 	'魏' / '蜀' / '吴' / '群'
 
 event =
-	event:("受到伤害后" / '受到伤害时' / '需要使用/打出【闪】时' / '死亡时') {
+	event:("受到伤害后" / '受到伤害时' / '需要使用/打出【闪】时' / '死亡时' / '翻面后') {
 		return {
 			"事件类型":event,
 		}

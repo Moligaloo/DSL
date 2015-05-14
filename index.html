@@ -226,6 +226,7 @@
 
 		<label for="input"> DSL :</label>
 		<textarea cols="40" rows="8" name="input" id="input"></textarea>
+		<button onclick="startParse()" > 开始解析 </button>
 		<div id='error-output' style='display:none'>
 			<p>解析出错:  <p>
 			期待的文本:
@@ -237,7 +238,7 @@
 				<span id='unparsed-text'> </span>
 			</p> 
 		</div>
-		<button onclick="startParse()" > 开始解析 </button>
+		
 		<label for='output'> 输出 (
 			<a id='showJSONLink' onclick="showJSON()">JSON </a> 
 			<a id='showTableLink' onclick="showTable()" style='display:none'> 表格</a>
