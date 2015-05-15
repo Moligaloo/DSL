@@ -532,7 +532,27 @@ card_modifier =
 			'卡牌限定':'颜色限定',
 			'颜色':card_color
 		};
-	} 
+	} /
+	card_suit:card_suit{
+		return {
+			'卡牌限定':'花色限定',
+			'花色':card_suit
+		}
+	}
+
+card_suit =
+	'♠' / '黑桃' {
+		return '黑桃';
+	} /
+	'♥' / '红桃' / '红心' {
+		return '红桃';
+	} /
+	'♣' / '梅花' / '草花' {
+		return '梅花';
+	} /
+	'♦' / '方块' / '方片' {
+		return '方块';
+	}
 
 card_color =
 	'红色' / '黑色' / '无色'
