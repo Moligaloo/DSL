@@ -150,6 +150,12 @@ compare_op =
 	} /
 	"小于" {
 		return '<'
+	} /
+	'不大于' {
+		return '<=';
+	} /
+	'不小于'{
+		return '>=';
 	}
 
 property_value =
@@ -265,8 +271,8 @@ option =
 	}
 
 literal_number =
-	number:[1-9] {
-		return parseInt(number);
+	digits:[1-9]+ {
+		return parseInt(digits.join(""), 10);
 	} / 
 	number:[一二三四五六七八九十] {
 		var numbers = "一二三四五六七八九十";
@@ -364,10 +370,27 @@ card_modifier =
 			'位置':area
 		};
 	} /
+	'至少' x:number '张'{
+		return {
+			'卡牌限定':'数量下限',
+			'下限':x
+		};
+	} /
+	'点数和' compare_op:compare_op x:number '的'{
+		return {
+			'卡牌限定':'点数和限定',
+			'比较符号':compare_op,
+			'比较数':x
+		};
+	} /
 	'所有' /
 	'造成此伤害' / 
-	'其中的' / 
-	'至少一张点数和不大于13' / 
+	'其中的' {
+		return {
+			'卡牌限定':'范围限定',
+			'范围':'此前提到的多张牌',
+		};
+	} /
 	'其余' / 
 	'其' /
 	number:number '张' {
