@@ -33,7 +33,7 @@
 		font-style: italic;
 	}
 
-	#bad-text{
+	#bad-text, #fail-skill-name{
 		color: red;
 		font-weight: bold;
 	}
@@ -139,8 +139,11 @@
 
 	function regressionTest(){
 		var skillName = null;
+		var skillIndex = null;
 		try{
 			for (var i = 0; i < skills.length; i++) {
+				skillIndex = i;
+
 				var skill = skills[i]
 				skillName = skill.name;
 				parser.parse(skill.content);
@@ -148,12 +151,20 @@
 
 			skillName = null;
 		}catch(e){
-			alert("检查技能失败，技能名:" + skillName);
+			$('#regression-good').hide();
+			$('#regression-bad').show();
+			$('#fail-skill-name').text(skillName);
+
+			setSkillWithIndex(skillIndex);
 		}
 
 		if(skillName == null){
-			alert("检查成功！");
+			$('#regression-good').show();
+			$('#regression-bad').hide();
 		}
+
+		$('#regression-output').show();
+		$('#regression-output').fadeOut(1000);
 	}
 
 	function startParse(){
@@ -250,7 +261,13 @@
 		<label for="input"> DSL :</label>
 		<textarea cols="40" rows="8" name="input" id="input"></textarea>
 		<button onclick="startParse()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-arrow-r ui-btn-icon-left ui-btn-a'> 开始解析 </button>
+		
 		<button onclick="regressionTest()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a'> 回归测试 </button>
+		<div id='regression-output' style="display:none">
+			<div id='regression-good'> 回归测试成功 </div>
+			<div id='regression-bad'> 回归测试失败，失败的技能是 <span id='fail-skill-name'></span> </div>
+		</div>
+
 		<div id='error-output' style='display:none'>
 			<p>解析出错:  <p>
 			期待的文本:
