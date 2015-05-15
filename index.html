@@ -256,6 +256,9 @@
 			<a href="#skillMenu" 
 				data-rel="popup" data-transition="slideup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-gear ui-btn-icon-left ui-btn-a"> <span id='skillName'> 选择技能 </span></a>
 
+			<a onclick="startParse()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-arrow-r ui-btn-icon-left ui-btn-a'> 开始解析 </a>
+			<a onclick="regressionTest()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a'> 回归测试 </a>
+
 			<div data-role="popup" id="skillMenu">
 				<ul data-role="listview" id='skillList' data-inset="true" style="min-width:210px;">
 			    </ul>
@@ -264,9 +267,7 @@
 
 		<label for="input"> DSL :</label>
 		<textarea cols="40" rows="8" name="input" id="input"></textarea>
-		<button onclick="startParse()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-arrow-r ui-btn-icon-left ui-btn-a'> 开始解析 </button>
 		
-		<button onclick="regressionTest()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a'> 回归测试 </button>
 		<div id='regression-output' style="display:none">
 			<div id='regression-good'> 回归测试成功 </div>
 			<div id='regression-bad'> 回归测试失败，失败的技能是 <span id='fail-skill-name'></span> </div>
@@ -288,7 +289,9 @@
 			<a id='showJSONLink' onclick="showJSON()">JSON </a> 
 			<a id='showTableLink' onclick="showTable()" style='display:none'> 表格</a>
 		): </label>
-		<div id='output' class='ui-content'>
+			<center>
+				<div id='output'>
+			</center>
 		</div>
 
 	</div>
