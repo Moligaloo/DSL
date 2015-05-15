@@ -23,7 +23,7 @@
 	.null { color: magenta; }
 	.key { color: red; }
 
-	table{
+	#output table{
 		border-style: solid;
 		border-width: 1px;
 	}
@@ -55,30 +55,43 @@
 
 		var default_index = skills.length-1;
 
-		var skillList = $('#skillList');
+		var table = $('<table>');
 
-		for (var i = 0; i < skills.length; i++) {
-			var skill = skills[i];
+		var columns = 5;
+		var rows = skills.length / columns;
+		for(var r = 0; r < rows; r++){
+			var row = $('<tr>');
+			for(var c = 0; c < 5; c++){
+				var i = columns * r + c;
 
-			skillList.append(			
-				$('<li>').append(
-					$('<a>').text(skill.name)
-					.attr('skillIndex', i)
-					.attr('data-role', 'button')
-					.attr('data-rel', 'back')
-					.addClass('ui-btn')
-					.click(function(event){
-						var index = $(event.target).attr('skillIndex');
-						setSkillWithIndex(index);
-					})
-				)
-			);
+				if(i >= skills.length)
+					break;
 
-			if("default" in skill)
-				default_index = i;
-		};
+				var skill = skills[i];
+
+				row.append(
+					$('<td>').append(
+						$('<a>')
+						.text(skill.name)
+						.attr('skillIndex', i)
+						.attr('data-rel', 'back')
+						.addClass('ui-btn ui-btn-inline ui-corner-all ui-shadow')
+						.click(function(event){
+							var index = $(event.target).attr('skillIndex');
+							setSkillWithIndex(index);
+							startParse();
+						})
+					)
+				);
+			}
+
+			table.append(row);
+		}
+
+		$('#wei-skillMenu').append(table);
 
 		setSkillWithIndex(default_index);
+		startParse();
 	});
 
 	function createTable(obj){
@@ -227,17 +240,24 @@
 	}
 
 	function showJSON(){
-		$('#output').empty().append($('<pre>').html(syntaxHighlight(result)));
+		$('#json-output').empty().append($('<pre>').html(syntaxHighlight(result))).show();
+		$('#output').empty().hide();
 
 		$('#showJSONLink').hide();
 		$('#showTableLink').show();
 	}
 
 	function showTable(){
-		$('#output').empty().append(createTable(result));
+		$('#output').empty().append(createTable(result)).show();
+		$('#json-output').empty().hide();
+
 
 		$('#showJSONLink').show();
 		$('#showTableLink').hide();
+	}
+
+	function showSkill(event){
+		$('#wei-skillMenu').show();
 	}
 
 </script>
@@ -247,22 +267,24 @@
 
 	<div data-role="header">
 		<h1> 太阳神三国杀 DSL 在线解析器</h1>
-	</div><!-- /header -->
+		<div data-role='navbar'>
+			<ul id='kingdoms'>
+				<li> <a href='#wei-skillMenu' data-rel='popup'> 魏 </a> </li>
+				<li> <a> 蜀 </a> </li>
+				<li> <a> 吴 </a> </li>
+				<li> <a> 群 </a> </li>
+				<li> <a> 神 </a> </li>
+			</ul>
+		</div>
+	</div>
 
 	<div role="main" class="ui-content">
+		<div id='wei-skillMenu' data-role='popup'> 
+		</div>
+
 		<div>
-		    <label for="skills">已有技能:</label>
-
-			<a href="#skillMenu" 
-				data-rel="popup" data-transition="slideup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-gear ui-btn-icon-left ui-btn-a"> <span id='skillName'> 选择技能 </span></a>
-
 			<a onclick="startParse()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-arrow-r ui-btn-icon-left ui-btn-a'> 开始解析 </a>
 			<a onclick="regressionTest()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a'> 回归测试 </a>
-
-			<div data-role="popup" id="skillMenu">
-				<ul data-role="listview" id='skillList' data-inset="true" style="min-width:210px;">
-			    </ul>
-			</div>
 		</div>
 
 		<label for="input"> DSL :</label>
@@ -284,15 +306,15 @@
 				<span id='unparsed-text'> </span>
 			</p> 
 		</div>
-		
-		<label for='output'> 输出 (
-			<a id='showJSONLink' onclick="showJSON()">JSON </a> 
-			<a id='showTableLink' onclick="showTable()" style='display:none'> 表格</a>
-		): </label>
+
+			输出 (
+				<a id='showJSONLink' onclick="showJSON()">JSON </a> 
+				<a id='showTableLink' onclick="showTable()" style='display:none'> 表格</a>
+			):
 			<center>
 				<div id='output'> </div>
 			</center>
-
+			<div id='json-output'></div>
 	</div>
 
 	<div data-role="footer">
@@ -301,7 +323,6 @@
 	</div>
 
 </div>
-
 
 </body>
 </html>
