@@ -350,7 +350,7 @@ area =
 			'区域':'场上',
 		};
 	} /
-	player:player '区域里'{
+	player:player '的'? '区域里'{
 		return {
 			'区域':'角色区域里',
 			'角色':player
@@ -369,7 +369,6 @@ card_modifier =
 	'其中的' / 
 	'至少一张点数和不大于13' / 
 	'其余' / 
-	'距离为1的一名角色的区域里的' / 
 	'其' /
 	number:number '张' {
 		return {
@@ -464,6 +463,12 @@ player_modifier =
 		return {
 			'角色修饰':"数量限定",
 			'数量':number
+		};
+	} /
+	'距离为' number:number '的'{
+		return {
+			'角色修饰':"距离限定",
+			'距离':number
 		};
 	}
 
