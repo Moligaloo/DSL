@@ -30,7 +30,7 @@ condition =
 			};
 		}else{
 			return {
-				'条件类型':'双重条件',
+				'条件类型':'并列条件',
 				'条件1':{
 					"目标": player,
 					"事件": event
@@ -223,14 +223,19 @@ adverbial =
 			'操作':op,
 			'增减值':x
 		};
-	}
+	} 
 
 timespan =
-	'此回合' {
+	'此回合'{
 		return {
 			'时段类型':'此回合',
-		}
-	} / 
+		};
+	} /
+	'此阶段'{
+		return {
+			'时段类型':'此阶段',
+		};
+	} /
 	player:player '的回合'{
 		return {
 			'时段类型':'某角色的回合',
@@ -245,6 +250,14 @@ timespan =
 	}
 
 action = 
+	'使用' card_name:card_name '的额定次数上限' op:number_linear_op x:number {
+		return {
+			'动作类型':'卡牌使用的额定次数上限修正',
+			'修正卡牌':card_name,
+			'修正符号':op,
+			'修正值':x
+		};
+	} /
 	pre_adverbial:adverbial+ action:action post_adverbial:adverbial*{
 		action['状语'] = pre_adverbial.concat(post_adverbial)
 		return action;
@@ -333,7 +346,7 @@ action =
 			'动作类型':'弃置',
 			'弃置卡牌':card
 		};
-	}	
+	} 
 
 option =
 	literal_number:literal_number "." statements:statements{
@@ -391,6 +404,17 @@ damage =
 	}
 
 card =	
+	card_modifier:card_modifier* mark_name:mark_name{
+		card_modifier.unshift({
+			'卡牌限定':'标记',
+			'标记':mark_name
+		});
+
+		return {
+			'对象类型':'卡牌',
+			'卡牌限定':card_modifier
+		};
+	} /
 	card_name:card_name {
 		return {
 			'对象类型':'卡牌',
@@ -448,15 +472,16 @@ second_card =
 	}
 
 area =
-	where:('场上' / '牌堆顶' / '弃牌堆' / '一名角色的装备区' / '武将牌上') { 
+	where:('场上' / '牌堆顶' / '弃牌堆' / '武将牌上') { 
 		return {
 			'区域':where,
 		};
 	} /
-	player:player '的'? '区域里'{
+	player:player '的'? where:('区域里' / '装备区') {
 		return {
 			'区域':'角色区域里',
-			'角色':player
+			'角色':player,
+			'区域':where
 		};
 	} 
 
@@ -514,7 +539,7 @@ card_color =
 
 card_name =
 	'【' name:[^】] '】'{
-		return {'卡牌名':name};
+		return name;
 	}
 
 punctuation =
@@ -613,7 +638,7 @@ event =
 			"修饰":damage_modifier
 		}
 	} /
-	phrase_name:phrase_name '阶段' endpoint:('开始时'/'结束时')?{
+	'的'? phrase_name:phrase_name '阶段' endpoint:('开始时'/'结束时')?{
 		return {
 			'事件类型':'阶段触发',
 			'哪个阶段':phrase_name,
