@@ -170,8 +170,8 @@
 
 	function startParse(){
 		var text = $('#input').val();
-		text = text.replace(' ', '');
-		$('#input').text(text);
+		text = text.replace(/ /g, '');
+		$('#input').val(text);
 
 		try{
 			result = parser.parse(text);

@@ -166,11 +166,40 @@ property_value =
 	}
 
 adverbial =
-	'于此回合内' / '不能'
+	'且' adverbial:adverbial{
+		return adverbial;
+	} /
+	'不能' {
+		return {
+			'状语类型':'禁止'
+		};
+	}/
+	'于' timespan:timespan '内'{
+		return {
+			'状语类型':'时间限定',
+			'时间':timespan
+		}
+	} /
+	'无距离限制' {
+		return {
+			'状语类型':'距离限定',
+			'距离':'无限'
+		};
+	} /
+	'额外次数上限' op:number_linear_op x:number{
+		return {
+			'状语类型':'额外次数上限修正',
+			'操作':op,
+			'增减值':x
+		};
+	}
+
+timespan =
+	'此回合' / (phrase_name '阶段')
 
 action = 
-	adverbial:adverbial+ action:action{
-		action['状语'] = adverbial;
+	pre_adverbial:adverbial+ action:action post_adverbial:adverbial*{
+		action['状语'] = pre_adverbial.concat(post_adverbial)
 		return action;
 	} /
 	'回复' number:number '点体力' {
@@ -270,6 +299,21 @@ option =
 		};
 	}
 
+number_linear_op =
+	number_increment / number_decrement
+
+number_increment = 
+	'加' {
+		return '+';
+	} / 
+	'+'
+
+number_decrement =
+	'减' {
+		return '-';
+	} /
+	'-'
+
 literal_number =
 	digits:[1-9]+ {
 		return parseInt(digits.join(""), 10);
@@ -303,6 +347,15 @@ damage =
 	}
 
 card =	
+	card_name:card_name {
+		return {
+			'对象类型':'卡牌',
+			'卡牌限定':{
+				'卡牌限定':'名称限定',
+				'名称':card_name
+			}
+		};
+	} /
 	card_modifier:card_modifier* '的'? '牌' second_card:second_card? {
 		if(second_card == ''){
 			return {
