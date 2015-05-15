@@ -21,7 +21,7 @@ condition =
 	} 
 
 statements =
-	statements:statement_with_punc+ period? { 
+	statements:statement_with_punc+ { 
 		return statements;
 	}
 
@@ -159,7 +159,14 @@ property_value =
 		};
 	}
 
+adverbial =
+	'于此回合内' / '不能'
+
 action = 
+	adverbial:adverbial+ action:action{
+		action['状语'] = adverbial;
+		return action;
+	} /
 	'回复' number:number '点体力' {
 		return {
 			"动作类型":"普通动作",
@@ -173,18 +180,11 @@ action =
 			'动词':'翻面'
 		};
 	} /
-	'使用' card:card{
+	op:('使用或打出' / '使用') card:card{
 		return {
 			'动作类型':"普通动作",
-			'动词':'使用',
+			'动词':op,
 			'宾语':card
-		};
-	} /
-	verb:verb object:object?{
-		return {
-			"动作类型":"普通动作",
-			"动词":verb,
-			"宾语":object
 		};
 	} /
 	'令' player:player action:action{
@@ -212,33 +212,69 @@ action =
 			"张数":number
 		};
 	} /
-	'将' object:object '置入' destination:destination{
+	'将' card:card '置入' destination:destination{
 		return {
 			"动作类型":"卡牌置入处理",
 			"目的地":destination,
-			"对象":object
+			"对象":card
 		};
-	} 
+	} /
+	buff:('多'/'少') '摸' number:number '张牌'{
+		return {
+			'动作类型':'额外摸牌处理',
+			'符号': buff == '多' ? '+' : '-',
+			'数量':number
+		};
+	} /
+	'防止' damage:damage{
+		return {
+			'动作类型':'普通动作',
+			'动作':'防止',
+			'宾语':damage
+		};
+	} /
+	'获得' object:(card / mark){
+		return {
+			'动作类型':'普通动作',
+			'动作':'获得',
+			'宾语':object
+		};
+	} /
+	'摸' number:number '张'? '牌'{
+		return {
+			'动作类型':'摸牌',
+			'数量':number
+		}
+	} /
+	'弃置' card:card{
+		return {
+			'动作类型':'弃置',
+			'弃置卡牌':card
+		};
+	}
 
 destination =
 	'弃牌堆' / '一名角色的装备区'
 
 option =
-	number:number "." action:action (semicolon / period) {
+	literal_number:literal_number "." statements:statements{
 		return {
-			"序号":number,
-			"动作":action
+			"序号":literal_number,
+			"语句":statements
 		};
 	}
 
-number = 
+literal_number =
 	number:[1-9] {
 		return parseInt(number);
 	} / 
 	number:[一二三四五六七八九十] {
 		var numbers = "一二三四五六七八九十";
 		return numbers.indexOf(number)+1;
-	} /
+	} 
+
+number = 
+	literal_number /
 	var_name:var_name{
 		return {
 			'数值类型':'变量',
@@ -252,13 +288,12 @@ var_name =
 decision = 
 	'是否打出【闪】'
 
-object =
-	card /
+damage = 
 	damage_modifier:damage_modifier '伤害'{
 		return {
 			"对象类型":"伤害",
 			"修饰":damage_modifier
-		}
+		};
 	}
 
 card =	
@@ -287,25 +322,37 @@ card =
 		}
 	}
 
+mark =
+	mark_modifier:mark_modifier '枚' mark_name:mark_name '标记'{
+		return {
+			'对象类型':'标记',
+			'标记名':mark_name,
+			'标记限定':mark_modifier
+		};
+	}
+
+mark_modifier =
+	number
+
+mark_name =
+	'【' name:[^】] '】' {
+		return name;
+	}
+
 second_card =
 	'/' card:card {
 		return card;
 	}
 
-verb = 
-	'获得' /
-	'摸' / 
-	'弃置' / 
-	'防止'
-
 card_modifier =
 	'所有' /
-	'每名其他角色区域里的' / 
+	'每名'
+	'其他角色区域里的' / 
 	'造成此伤害' / 
 	'其中的' / 
 	'至少一张点数和不大于13' / 
 	'其余' / 
-	'其距离为1的一名角色的区域里的一张' / 
+	'距离为1的一名角色的区域里的' / 
 	'其' /
 	number:number '张' {
 		return {
@@ -418,11 +465,11 @@ event =
 			"修饰":damage_modifier
 		}
 	} /
-	phrase_name:phrase_name '阶段' endpoint:('开始'/'结束') '时'{
+	phrase_name:phrase_name '阶段' endpoint:('开始时'/'结束时')?{
 		return {
 			'事件类型':'阶段触发',
 			'哪个阶段':phrase_name,
-			'开始还是结束':endpoint
+			'开始还是结束':endpoint == '' ? '开始时' : endpoint
 		};
 	} /
 	'的' card_modifiers:card_modifier* '判定牌生效后' {
