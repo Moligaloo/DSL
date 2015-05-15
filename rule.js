@@ -344,10 +344,27 @@ second_card =
 		return card;
 	}
 
+area =
+	'场上'{
+		return {
+			'区域':'场上',
+		};
+	} /
+	player:player '区域里'{
+		return {
+			'区域':'角色区域里',
+			'角色':player
+		};
+	}
+
 card_modifier =
+	area:area '的'? {
+		return {
+			'卡牌限定':'位置限定',
+			'位置':area
+		};
+	} /
 	'所有' /
-	'每名'
-	'其他角色区域里的' / 
 	'造成此伤害' / 
 	'其中的' / 
 	'至少一张点数和不大于13' / 
@@ -371,13 +388,7 @@ card_modifier =
 			'卡牌限定':'颜色限定',
 			'颜色':card_color
 		};
-	} /
-	'场上' '的'? {
-		return {
-			'卡牌限定':'位置限定',
-			'位置':'场上'
-		};
-	}
+	} 
 
 card_color =
 	'红色' / '黑色' / '无色'
@@ -429,9 +440,15 @@ player =
 			"角色":"代词",
 			"指代":"上一次提到的角色"
 		};
-	} 
+	}
 
 player_modifier =
+	'每名'{
+		return {
+			'角色修饰':'范围限定',
+			'范围':'所有符合条件的角色'
+		};
+	} /
 	kingdom:kingdom '势力' {
 		return {
 			"角色修饰":"势力限定",
@@ -440,7 +457,7 @@ player_modifier =
 	} /
 	'其他' {
 		return {
-			"角色修饰":"排除限定"
+			"角色修饰":"排除自己"
 		};
 	} /
 	number:number '名'{
