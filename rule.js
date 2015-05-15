@@ -1,4 +1,13 @@
 skill =
+ 	sections:skill_section+{
+ 		if(sections.length == 1)
+ 			return sections[0];
+ 		else{
+ 			return sections;
+ 		}
+ 	}
+
+skill_section =
 	skill_spec:skill_type* condition:condition? statements:statements{
 		return {
 			"技能类型": skill_spec,
@@ -13,12 +22,28 @@ skill_type =
 	}
 
 condition =
-	when:when? player:player? event:event comma? {
-		return {
-			"目标": player,
-			"事件": event
-		};
+	when:when? player:player? event:event second_condition:second_condition? punctuation? {
+		if(second_condition == ''){
+			return {
+				"目标": player,
+				"事件": event
+			};
+		}else{
+			return {
+				'条件类型':'双重条件',
+				'条件1':{
+					"目标": player,
+					"事件": event
+				},
+				'条件2':second_condition
+			};
+		}
 	} 
+
+second_condition = 
+	'或' condition:condition {
+		return condition;
+	}
 
 statements =
 	statements:statement_with_punc+ { 
@@ -89,6 +114,12 @@ statement =
 	} /
 	'若如此做' {
 		return undefined;
+	} /
+	'称为' mark_name:mark_name{
+		return {
+			'语句类型':'标记定义',
+			'标记名':mark_name
+		};
 	}
 
 thing =
@@ -195,7 +226,23 @@ adverbial =
 	}
 
 timespan =
-	'此回合' / (phrase_name '阶段')
+	'此回合' {
+		return {
+			'时段类型':'此回合',
+		}
+	} / 
+	player:player '的回合'{
+		return {
+			'时段类型':'某角色的回合',
+			'角色':player
+		};
+	} /
+	phrase_name:phrase_name '阶段' {
+		return{
+			'时段':'阶段',
+			'阶段名':phrase_name
+		};
+	}
 
 action = 
 	pre_adverbial:adverbial+ action:action post_adverbial:adverbial*{
@@ -247,7 +294,7 @@ action =
 			"张数":number
 		};
 	} /
-	'将' card:card '置入' destination:destination{
+	'将' card:card ('置入' / '置于') destination:area{
 		return {
 			"动作类型":"卡牌置入处理",
 			"目的地":destination,
@@ -286,10 +333,7 @@ action =
 			'动作类型':'弃置',
 			'弃置卡牌':card
 		};
-	}
-
-destination =
-	'弃牌堆' / '一名角色的装备区'
+	}	
 
 option =
 	literal_number:literal_number "." statements:statements{
@@ -394,7 +438,7 @@ mark_modifier =
 	number
 
 mark_name =
-	'【' name:[^】] '】' {
+	left_quote name:[^\u0022\u300D\u201D]+ right_quote {
 		return name;
 	}
 
@@ -404,9 +448,9 @@ second_card =
 	}
 
 area =
-	'场上'{
+	where:('场上' / '牌堆顶' / '弃牌堆' / '一名角色的装备区' / '武将牌上') { 
 		return {
-			'区域':'场上',
+			'区域':where,
 		};
 	} /
 	player:player '的'? '区域里'{
@@ -414,7 +458,7 @@ area =
 			'区域':'角色区域里',
 			'角色':player
 		};
-	}
+	} 
 
 card_modifier =
 	area:area '的'? {
@@ -487,6 +531,12 @@ semicolon =
 
 colon =
 	':' / '：'
+
+left_quote =
+	'"' / '「' / '“'
+
+right_quote =
+	'"' / '」' / '”'
 
 // end
 
@@ -574,6 +624,12 @@ event =
 		return {
 			'事件类型':'判定牌生效',
 			'判定牌修饰':card_modifiers
+		};
+	} /
+	action:action '时'?{
+		return {
+			'事件类型':'执行操作',
+			'动作':action
 		};
 	}
 
