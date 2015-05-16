@@ -54,41 +54,23 @@
 		skills = data;
 
 		var default_index = skills.length-1;
+		var skillList = $('#wei-skills');
+		for (var i = 0; i < skills.length; i++) {
+			var skill = skills[i];
 
-		var table = $('<table>');
-
-		var columns = 5;
-		var rows = skills.length / columns;
-		for(var r = 0; r < rows; r++){
-			var row = $('<tr>');
-			for(var c = 0; c < 5; c++){
-				var i = columns * r + c;
-
-				if(i >= skills.length)
-					break;
-
-				var skill = skills[i];
-
-				row.append(
-					$('<td>').append(
-						$('<a>')
-						.text(skill.name)
-						.attr('skillIndex', i)
-						.attr('data-rel', 'back')
-						.addClass('ui-btn ui-btn-inline ui-corner-all ui-shadow')
-						.click(function(event){
-							var index = $(event.target).attr('skillIndex');
-							setSkillWithIndex(index);
-							startParse();
-						})
-					)
-				);
-			}
-
-			table.append(row);
+			skillList.append(
+				$('<a>')
+					.text(skill.name)
+					.attr('skillIndex', i)
+					.attr('data-rel', 'back')
+					.addClass('ui-btn ui-btn-inline ui-corner-all ui-shadow')
+					.click(function(event){
+						var index = $(event.target).attr('skillIndex');
+						setSkillWithIndex(index);
+						startParse();
+					})
+			);
 		}
-
-		$('#wei-skillMenu').append(table);
 
 		setSkillWithIndex(default_index);
 		if(parser != null)
@@ -270,7 +252,7 @@
 		<h1> 太阳神三国杀 DSL 在线解析器</h1>
 		<div data-role='navbar'>
 			<ul id='kingdoms'>
-				<li> <a href='#wei-skillMenu' data-rel='popup'> 魏 </a> </li>
+				<li> <a href='#wei-skills-dialog' data-rel='dialog' data-transition='slideup'> 魏 </a> </li>
 				<li> <a> 蜀 </a> </li>
 				<li> <a> 吴 </a> </li>
 				<li> <a> 群 </a> </li>
@@ -324,6 +306,51 @@
 	</div>
 
 </div>
+
+	<div data-role='dialog' id='wei-skills-dialog'>
+		<div data-role='header'>
+			<h1> 魏国武将技能 </h1>
+		</div>
+
+		<div role='main' class='ui-content' id='wei-skills'>
+		</div>
+	</div>
+
+	<div data-role='dialog' id='shu-skills-dialog'>
+		<div data-role='header'>
+			<h1> 蜀国武将技能 </h1>
+		</div>
+
+		<div role='main' class='ui-content' id='shu-skills'>
+		</div>
+	</div>
+
+	<div data-role='dialog' id='wu-skills-dialog'>
+		<div data-role='header'>
+			<h1> 吴国武将技能 </h1>
+		</div>
+
+		<div role='main' class='ui-content' id='wu-skills'>
+		</div>
+	</div>
+
+	<div data-role='dialog' id='qun-skills-dialog'>
+		<div data-role='header'>
+			<h1> 群雄武将技能 </h1>
+		</div>
+
+		<div role='main' class='ui-content' id='qun-skills'>
+		</div>
+	</div>
+
+	<div data-role='dialog' id='god-skills-dialog'>
+		<div data-role='header'>
+			<h1> 神武将技能 </h1>
+		</div>
+
+		<div role='main' class='ui-content' id='god-skills'>
+		</div>
+	</div>
 
 </body>
 </html>
