@@ -38,12 +38,16 @@
 		font-weight: bold;
 	}
 
+	#skillName{
+		font-weight: bold;
+	}
+
 </style>
 
 <script type="text/javascript">
 
 	var parser = null;
-	var skills = null;
+	var skillMap = null;
 	var result = null;
 
 	$.get('rule.txt', function(data){
@@ -51,29 +55,28 @@
 	});
 
 	$.get('skills.json', function(data){
-		skills = data;
+		skillMap = data.wei;
 
-		var default_index = skills.length-1;
 		var skillList = $('<div>').addClass('ui-content').attr('role', 'main');
-		for (var i = 0; i < skills.length; i++) {
-			var skill = skills[i];
-
+		var lastSkillName = '';
+		for(var skillName in skillMap){
 			skillList.append(
 				$('<a>')
-					.text(skill.name)
-					.attr('skillIndex', i)
+					.text(skillName)
 					.attr('data-rel', 'back')
 					.addClass('ui-btn ui-btn-inline ui-corner-all ui-shadow')
 					.click(function(event){
-						var index = $(event.target).attr('skillIndex');
-						setSkillWithIndex(index);
+						var skillName = $(event.target).text();
+						fillInputWithSkillName(skillName);
 						startParse();
 					})
 			);
+
+			lastSkillName = skillName;
 		}
 
 		$('#wei-skills-dialog').append(skillList);
-		setSkillWithIndex(default_index);
+		fillInputWithSkillName(lastSkillName);
 		if(parser != null)
 			startParse();
 	});
@@ -138,13 +141,9 @@
 		var skillName = null;
 		var skillIndex = null;
 		try{
-			for (var i = 0; i < skills.length; i++) {
-				skillIndex = i;
-
-				var skill = skills[i]
-				skillName = skill.name;
-				parser.parse(skill.content);
-			};
+			for(skillName in skillMap){
+				parser.parse(skillMap[skillName]);
+			}
 
 			skillName = null;
 		}catch(e){
@@ -152,7 +151,7 @@
 			$('#regression-bad').show();
 			$('#fail-skill-name').text(skillName);
 
-			setSkillWithIndex(skillIndex);
+			fillInputWithSkillName(skillName);
 			startParse();
 		}
 
@@ -195,9 +194,9 @@
 		}
 	}
 
-	function setSkillWithIndex(i){
-		$('#skillName').text(skills[i].name);
-		$('#input').val(skills[i].content);
+	function fillInputWithSkillName(skillName){
+		$('#skillName').text(skillName);
+		$('#input').val(skillMap[skillName]);
 	}
 
 	// code copied from http://stackoverflow.com/questions/4810841/how-can-i-pretty-print-json-using-javascript
@@ -265,9 +264,11 @@
 		<div>
 			<a onclick="startParse()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-arrow-r ui-btn-icon-left ui-btn-a'> 开始解析 </a>
 			<a onclick="regressionTest()" class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a'> 回归测试 </a>
+
+			<span> 当前技能： <span id='skillName'></span> </span>
 		</div>
 
-		<label for="input"> DSL :</label>
+		<label for="input"> 技能描述 :</label> 
 		<textarea cols="40" rows="8" name="input" id="input"></textarea>
 		
 		<div id='regression-output' style="display:none">
