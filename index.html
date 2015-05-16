@@ -54,7 +54,7 @@
 		skills = data;
 
 		var default_index = skills.length-1;
-		var skillList = $('#wei-skills');
+		var skillList = $('<div>').addClass('ui-content').attr('role', 'main');
 		for (var i = 0; i < skills.length; i++) {
 			var skill = skills[i];
 
@@ -72,6 +72,7 @@
 			);
 		}
 
+		$('#wei-skills-dialog').append(skillList);
 		setSkillWithIndex(default_index);
 		if(parser != null)
 			startParse();
@@ -239,10 +240,6 @@
 		$('#showTableLink').hide();
 	}
 
-	function showSkill(event){
-		$('#wei-skillMenu').show();
-	}
-
 </script>
 
 
@@ -311,17 +308,11 @@
 		<div data-role='header'>
 			<h1> 魏国武将技能 </h1>
 		</div>
-
-		<div role='main' class='ui-content' id='wei-skills'>
-		</div>
 	</div>
 
 	<div data-role='dialog' id='shu-skills-dialog'>
 		<div data-role='header'>
 			<h1> 蜀国武将技能 </h1>
-		</div>
-
-		<div role='main' class='ui-content' id='shu-skills'>
 		</div>
 	</div>
 
@@ -329,26 +320,17 @@
 		<div data-role='header'>
 			<h1> 吴国武将技能 </h1>
 		</div>
-
-		<div role='main' class='ui-content' id='wu-skills'>
-		</div>
 	</div>
 
 	<div data-role='dialog' id='qun-skills-dialog'>
 		<div data-role='header'>
 			<h1> 群雄武将技能 </h1>
 		</div>
-
-		<div role='main' class='ui-content' id='qun-skills'>
-		</div>
 	</div>
 
 	<div data-role='dialog' id='god-skills-dialog'>
 		<div data-role='header'>
 			<h1> 神武将技能 </h1>
-		</div>
-
-		<div role='main' class='ui-content' id='god-skills'>
 		</div>
 	</div>
 
