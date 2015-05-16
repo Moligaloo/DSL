@@ -53,16 +53,18 @@
 	var parser = null;
 	var skillMap = null;
 	var result = null;
+	var lastSkillName = null;
 
 	$.get('rule.txt', function(data){
 		parser = PEG.buildParser(data);
+		if(parser && lastSkillName)
+			startParse();
 	});
 
 	$.get('skills.json', function(data){
 		skillMap = data.wei;
 
 		var skillList = $('<div>').addClass('ui-content').attr('role', 'main');
-		var lastSkillName = '';
 		for(var skillName in skillMap){
 			skillList.append(
 				$('<a>')
@@ -81,8 +83,10 @@
 
 		$('#wei-skills-dialog').append(skillList);
 		fillInputWithSkillName(lastSkillName);
-		if(parser != null)
+		if(parser){
 			startParse();
+			lastSkillName = null;
+		}
 	});
 
 	function createTable(obj){
