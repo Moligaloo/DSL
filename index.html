@@ -150,7 +150,7 @@
 		var skillIndex = null;
 		try{
 			for(skillName in skillMap){
-				parser.parse(skillMap[skillName]);
+				parser.parse(preprocess(skillMap[skillName]));
 			}
 
 			skillName = null;
@@ -172,21 +172,45 @@
 		$('#regression-output').fadeOut(1000);
 	}
 
+	function createSourceMap(text){
+		var sourceMap = new Object();
+
+		var pointer = 0;
+		for (var i = 0; i < text.length; i++) {
+			var c = text[i];
+			if(c == ' ' || c == '的')
+				continue;
+			else{
+				sourceMap[pointer] = i;
+				pointer ++;
+			}
+		}
+
+		return sourceMap;
+	}
+
+	function preprocess(text){
+		return text.replace(/[ 的]/g, '');
+	}
+
 	function startParse(){
 		var text = $('#input').val();
-		text = text.replace(/ /g, '');
-		$('#input').val(text);
+		var sourceMap = null;
 
 		try{
-			result = parser.parse(text);
+			sourceMap = createSourceMap(text);
+
+			result = parser.parse(preprocess(text));
 			showTable();
 
 			$('#error-output').hide();
 		}catch(e){
 			if('expected' in e){
-				$('#good-text').text(text.substring(0, e.offset));
-				$('#bad-text').text(text.substring(e.offset, e.offset+1));
-				$('#unparsed-text').text(text.substring(e.offset+1));
+				var offset = sourceMap[e.offset];
+
+				$('#good-text').text(text.substring(0, offset));
+				$('#bad-text').text(text.substring(offset, offset+1));
+				$('#unparsed-text').text(text.substring(offset+1));
 
 				var expected = $('#expected');
 				expected.empty();

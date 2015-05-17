@@ -89,7 +89,7 @@ statement =
 			"类型":card_class
 		};
 	} /
-	from:player '与' to:player '的距离' modify:distance_modify{
+	from:player '与' to:player '距离' modify:distance_modify{
 		return {
 			"语句类型":'距离修正',
 			"源":from,
@@ -97,7 +97,7 @@ statement =
 			"修正":modify
 		};
 	} /
-	var_name:var_name '为' player:player '的'? player_property:player_property{
+	var_name:var_name '为' player:player player_property:player_property{
 		return {
 			'语句类型':'变量定义',
 			'变量名':var_name,
@@ -123,7 +123,7 @@ statement =
 	}
 
 thing =
-	'其打出的【闪】结算完毕后' / '你使用/打出此【闪】'
+	'其打出【闪】结算完毕后' / '你使用/打出此【闪】'
 
 distance_modify =
 	sign:[+-] number:number {
@@ -134,7 +134,7 @@ distance_modify =
 	}	
 	
 if_condition =
-	'至少一名其他角色的区域里有牌' /
+	'至少一名其他角色区域里有牌' /
 	player:player player_property:player_property compare_op:compare_op property_value:property_value{
 		return {
 			"判断类型":"角色属性判断",
@@ -154,7 +154,7 @@ if_condition =
 	}
 
 player_property = 
-	'体力值' / '已损失的体力值'
+	'体力值' / '已损失体力值'
 
 kind_op =
 	'为' {
@@ -236,7 +236,7 @@ timespan =
 			'时段类型':'此阶段',
 		};
 	} /
-	player:player '的回合'{
+	player:player '回合'{
 		return {
 			'时段类型':'某角色的回合',
 			'角色':player
@@ -250,7 +250,7 @@ timespan =
 	}
 
 action = 
-	'使用' card_name:card_name '的额定次数上限' op:number_linear_op x:number {
+	'使用' card_name:card_name '额定次数上限' op:number_linear_op x:number {
 		return {
 			'动作类型':'卡牌使用的额定次数上限修正',
 			'修正卡牌':card_name,
@@ -301,7 +301,7 @@ action =
 			"可选项":options
 		}
 	} /
-	'亮出牌堆顶的' number:number '张牌'{
+	'亮出牌堆顶' number:number '张牌'{
 		return{
 			"动作类型":"亮出牌堆顶的牌",
 			"张数":number
@@ -430,7 +430,7 @@ card =
 			}
 		};
 	} /
-	card_modifier:card_modifier* '的'? '牌' second_card:second_card? {
+	card_modifier:card_modifier* '牌' second_card:second_card? {
 		if(second_card == ''){
 			return {
 				'对象类型':'卡牌',
@@ -483,7 +483,7 @@ area =
 			'区域':where,
 		};
 	} /
-	player:player '的'? where:('区域里' / '装备区') {
+	player:player where:('区域里' / '装备区') {
 		return {
 			'区域':'角色区域里',
 			'角色':player,
@@ -492,7 +492,7 @@ area =
 	} 
 
 card_modifier =
-	area:area '的'? {
+	area:area {
 		return {
 			'卡牌限定':'位置限定',
 			'位置':area
@@ -504,7 +504,7 @@ card_modifier =
 			'下限':x
 		};
 	} /
-	'点数和' compare_op:compare_op x:number '的'{
+	'点数和' compare_op:compare_op x:number{
 		return {
 			'卡牌限定':'点数和限定',
 			'比较符号':compare_op,
@@ -513,7 +513,7 @@ card_modifier =
 	} /
 	'所有' /
 	'造成此伤害' / 
-	'其中的' {
+	'其中' {
 		return {
 			'卡牌限定':'范围限定',
 			'范围':'此前提到的多张牌',
@@ -638,7 +638,7 @@ player_modifier =
 			'数量':number
 		};
 	} /
-	'距离为' number:number '的'{
+	'距离为' number:number {
 		return {
 			'角色修饰':"距离限定",
 			'距离':number
@@ -660,14 +660,14 @@ event =
 			"修饰":damage_modifier
 		}
 	} /
-	'的'? phrase_name:phrase_name '阶段' endpoint:('开始时'/'结束时')?{
+	phrase_name:phrase_name '阶段' endpoint:('开始时'/'结束时')?{
 		return {
 			'事件类型':'阶段触发',
 			'哪个阶段':phrase_name,
 			'开始还是结束':endpoint == '' ? '开始时' : endpoint
 		};
 	} /
-	'的' card_modifiers:card_modifier* '判定牌生效后' {
+	card_modifiers:card_modifier* '判定牌生效后' {
 		return {
 			'事件类型':'判定牌生效',
 			'判定牌修饰':card_modifiers
