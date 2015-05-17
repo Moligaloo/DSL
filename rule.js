@@ -22,7 +22,7 @@ skill_type =
 	}
 
 condition =
-	when:when? player:player? event:event second_condition:second_condition? punctuation? {
+	'当'? player:player? event:event second_condition:second_condition? punctuation? {
 		if(second_condition == ''){
 			return {
 				"目标": player,
@@ -404,6 +404,12 @@ damage =
 	}
 
 card =	
+	'之' {
+		return {
+			'对象类型':'卡牌',
+			'卡牌限定':'之前提到的卡牌'
+		}
+	} /
 	card_modifier:card_modifier* mark_name:mark_name{
 		card_modifier.unshift({
 			'卡牌限定':'标记',
@@ -537,7 +543,7 @@ card_modifier =
 		return {
 			'卡牌限定':'花色限定',
 			'花色':card_suit
-		}
+		};
 	}
 
 card_suit =
@@ -584,10 +590,6 @@ right_quote =
 	'"' / '」' / '”'
 
 // end
-
-when = 
-	'当'
-
 player =
 	you:'你' {
 		return {
