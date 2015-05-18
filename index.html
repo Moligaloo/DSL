@@ -37,7 +37,7 @@
 		font-style: italic;
 	}
 
-	#bad-text, #fail-skill-name{
+	#bad-text, #fail-skill-name, #build-parser-error{
 		color: red;
 		font-weight: bold;
 	}
@@ -56,7 +56,14 @@
 	var lastSkillName = null;
 
 	$.get('rule.txt', function(data){
-		parser = PEG.buildParser(data);
+		try{
+			parser = PEG.buildParser(data);
+		}catch(e){
+			$('#build-parser-error').text(e.message);
+			$('#build-parser-error').parent().show();
+			$('#showJSONLink').parent().hide();
+		}
+
 		if(parser && lastSkillName)
 			startParse();
 	});
@@ -308,6 +315,11 @@
 			<div id='regression-bad'> 回归测试失败，失败的技能是 <span id='fail-skill-name'></span> </div>
 		</div>
 
+		<div class='display: none'>
+			<div> 构造解析器错误: </div>
+			<div id='build-parser-error' />
+		</div>
+
 		<div id='error-output' style='display:none'>
 			<p>解析出错:  <p>
 			期待的文本:
@@ -320,6 +332,8 @@
 			</p> 
 		</div>
 
+		<div>
+
 			输出 (
 				<a id='showJSONLink' onclick="showJSON()">JSON </a> 
 				<a id='showTableLink' onclick="showTable()" style='display:none'> 表格</a>
@@ -328,6 +342,8 @@
 				<div id='output'> </div>
 			</center>
 			<div id='json-output'></div>
+
+		</div>
 	</div>
 
 	<div data-role="footer">
