@@ -632,11 +632,17 @@ player_modifier =
 			"角色修饰":"排除自己"
 		};
 	} /
-	number:number '名'{
-		return {
+	minmax:('至少'/'至多')? x:number '名'{
+		var modifier = {
 			'角色修饰':"数量限定",
-			'数量':number
+			'数量':x
 		};
+
+		if(minmax != ''){
+			modifier['至多还是至少'] = minmax;
+		}
+
+		return modifier;
 	} /
 	'距离为' number:number {
 		return {
