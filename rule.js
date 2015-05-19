@@ -8,10 +8,10 @@ skill =
  	}
 
 skill_section =
-	skill_spec:skill_type* condition:condition? statements:statements{
+	skill_spec:skill_type* conditions:conditions? statements:statements{
 		return {
 			"技能类型": skill_spec,
-			"发动条件": condition,
+			"发动条件": conditions
 			"执行效果": statements
 		};
 	}
@@ -21,23 +21,25 @@ skill_type =
 		return type;
 	}
 
-condition =
-	'当'? player:player? event:event second_condition:second_condition? punctuation? {
+conditions = 
+	condition:condition second_condition:second_condition? punctuation? {
 		if(second_condition == ''){
-			return {
-				"目标": player,
-				"事件": event
-			};
+			return condition;
 		}else{
 			return {
 				'条件类型':'并列条件',
-				'条件1':{
-					"目标": player,
-					"事件": event
-				},
+				'条件1':condition
 				'条件2':second_condition
 			};
 		}
+	}
+
+condition =
+	'当'? player:player? event:event {
+		return {
+			"目标": player,
+			"事件": event
+		};
 	} 
 
 second_condition = 
