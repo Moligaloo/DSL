@@ -136,9 +136,23 @@ distance_modify =
 			"数值":number
 		};
 	}	
+
+has_card_or_not = 
+	'有牌' {
+		return true;
+	} /
+	'无牌' {
+		return false;
+	}
 	
 if_condition =
-	'至少一名其他角色区域里有牌' /
+	area:area has:has_card_or_not {
+		return {
+			'判断类型':'区域内容判断',
+			'区域':area,
+			'是否有牌': has
+		};
+	} /
 	player:player player_property:player_property compare_op:compare_op property_value:property_value{
 		return {
 			"判断类型":"角色属性判断",

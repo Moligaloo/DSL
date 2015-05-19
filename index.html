@@ -100,6 +100,9 @@
 		if(obj == null || obj == undefined)
 			return null;
 
+		if(typeof obj == 'boolean')
+			return $('<td>').text(obj ? '是' : '否').addClass('boolean');
+
 		if(typeof obj == 'string'){
 			if(obj == ''){
 				return $('<td>').text('省略').addClass('omit');
