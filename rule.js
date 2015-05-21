@@ -156,7 +156,7 @@ if_condition =
 	player:player player_property:player_property compare_op:compare_op property_value:property_value{
 		return {
 			"判断类型":"角色属性判断",
-			"对象":player,
+			"角色":player,
 			"属性":player_property,
 			"判断符":compare_op,
 			"值":property_value
@@ -169,6 +169,14 @@ if_condition =
 			"判断符":kind_op,
 			"类别":card_class
 		}
+	} /
+	player:player '武将牌' face:('正面'/'背面') '朝上'{
+		return {
+			"判断类型":'角色属性判断',
+			'角色':player,
+			'属性':'翻面状态',
+			'朝上的面':face
+		};
 	}
 
 player_property = 
@@ -268,7 +276,13 @@ timespan =
 	}
 
 action = 
-	'使用' card_name:card_name '额定次数上限' op:number_linear_op x:number {
+	'视为' action:action{
+		return {
+			'动作类型':'视为操作',
+			'视为操作':action
+		};
+	} /
+ 	'使用' card_name:card_name '额定次数上限' op:number_linear_op x:number {
 		return {
 			'动作类型':'卡牌使用的额定次数上限修正',
 			'修正卡牌':card_name,
@@ -676,7 +690,7 @@ kingdom =
 	'魏' / '蜀' / '吴' / '群'
 
 event =
-	event:("受到伤害后" / '受到伤害时' / '需要使用/打出【闪】时' / '死亡时' / '翻面后') {
+	event:("受到伤害后" / '受到伤害时' / '需要使用/打出【闪】时' / '死亡时' / '翻面后' / '需要使用【酒】时' / '受到伤害结算结束后') {
 		return {
 			"事件类型":event,
 		}
