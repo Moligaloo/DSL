@@ -529,7 +529,9 @@ card_modifier =
 			'比较数':x
 		};
 	} /
-	'所有' /
+	'所有' {
+		return undefined;
+	} /
 	'造成此伤害' / 
 	'其中' {
 		return {
@@ -562,19 +564,20 @@ card_modifier =
 			'卡牌限定':'花色限定',
 			'花色':card_suit
 		};
-	}
+	} /
+	'被弃置'
 
 card_suit =
-	'♠' / '黑桃' {
+	('♠' / '黑桃') {
 		return '黑桃';
 	} /
-	'♥' / '红桃' / '红心' {
+	('♥' / '红桃' / '红心') {
 		return '红桃';
 	} /
-	'♣' / '梅花' / '草花' {
+	('♣' / '梅花' / '草花') {
 		return '梅花';
 	} /
-	'♦' / '方块' / '方片' {
+	('♦' / '方块' / '方片') {
 		return '方块';
 	}
 
@@ -691,9 +694,9 @@ event =
 			'开始还是结束':endpoint == '' ? '开始时' : endpoint
 		};
 	} /
-	card_modifiers:card_modifier* '判定牌生效后' {
+	card_modifiers:card_modifier* what:('判定牌生效后' / '判定牌置入弃牌堆后' / '牌置入弃牌堆后') {
 		return {
-			'事件类型':'判定牌生效',
+			'事件类型':what,
 			'判定牌修饰':card_modifiers
 		};
 	} /
