@@ -78,11 +78,16 @@
 		var skillList = $('<div>').addClass('ui-content').attr('role', 'main');
 		var table = $('<table>');
 
-		for(var generalName in data.wei){
+		var array = data.wei;
+
+		for(var i=0; i< array.length; i++){
+			var general = array[i];
+			var generalName = general['武将'];
+			var generalSkills = general['技能'];
+
 			var skillCell = $('<td>');
 			table.append($('<tr>').append($('<th>').text(generalName)).append(skillCell));
-			var map = data.wei[generalName];
-			for(var skillName in map){
+			for(var skillName in generalSkills){
 				skillCell.append(
 					$('<a>')
 					.text(skillName)
@@ -96,7 +101,7 @@
 				);
 
 				lastSkillName = skillName;
-				skillMap[skillName] = map[skillName];
+				skillMap[skillName] = generalSkills[skillName];
 			}
 		}
 
