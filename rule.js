@@ -60,6 +60,12 @@ statement_with_punc =
 	}
 
 statement =
+	'各' statement:statement{
+		return {
+			'语句类型':'循环操作',
+			'循环语句':statement
+		};
+	} /
 	left_paren statement:statement right_paren{
 		return statement;
 	} /
@@ -188,7 +194,7 @@ if_condition =
 	}
 
 player_property = 
-	'体力值' / '已损失体力值'
+	'体力值' / '已损失体力值' / '数'
 
 kind_op =
 	'为' {
@@ -290,6 +296,12 @@ timespan =
 	}
 
 action = 
+	'放弃' what:'摸牌' {
+		return {
+			'动作类型':'放弃获取资源',
+			'资源':'摸牌'
+		};
+	} /
 	'观看牌堆顶' x:number '张牌'{
 		return {
 			'动作类型':'观看牌堆顶的牌',
@@ -345,6 +357,12 @@ action =
 		return {
 			"动作类型":"选择动作",
 			"决定":decision
+		};
+	} /
+	'选择' player:player{
+		return {
+			'动作类型':'选择角色',
+			'角色':player
 		};
 	} /
 	'选择一项' colon? options:option+{
@@ -498,7 +516,7 @@ card =
 			}
 		};
 	} /
-	card_modifier:card_modifier* '牌' second_card:second_card? {
+	card_modifier:card_modifier* card:('手牌' / '牌') second_card:second_card? {
 		if(second_card == ''){
 			return {
 				'对象类型':'卡牌',
@@ -590,7 +608,12 @@ card_modifier =
 		};
 	} /
 	'其余' / 
-	'其' /
+	'其' {
+		return {
+			'卡牌限定':'拥有者限定',
+			'拥有者':'之前提到的角色'
+		}
+	} /
 	number:number '张' {
 		return {
 			'卡牌限定':'数量限定',
@@ -686,6 +709,13 @@ player =
 	}
 
 player_modifier =
+	'有手牌' {
+		return {
+			'角色修饰':'手牌数目限定',
+			'操作符': '>',
+			'数目':0
+		};
+	} /
 	'每名'{
 		return {
 			'角色修饰':'范围限定',
@@ -703,24 +733,37 @@ player_modifier =
 			"角色修饰":"排除自己"
 		};
 	} /
-	minmax:('至少'/'至多')? x:number '名'{
-		var modifier = {
-			'角色修饰':"数量限定",
-			'数量':x
+	min:number '至' max:number '名'{
+		return {
+			'角色修饰':'数量限定',
+			'下限':min,
+			'上限':max
 		};
-
-		if(minmax != ''){
-			modifier['至多还是至少'] = minmax;
-		}
-
-		return modifier;
+	} /
+	x:number '名'{
+		return {
+			'角色修饰':'数量限定',
+			'数目':x
+		};
+	} /
+	'至少' x:number '名'{
+		return {
+			'角色修饰':'数量限定',
+			'下限':x
+		};
+	} /
+	'至多' x:number '名'{
+		return {
+			'角色修饰':'数量限定',
+			'上限':x
+		};
 	} /
 	'距离为' number:number {
 		return {
 			'角色修饰':"距离限定",
 			'距离':number
 		};
-	}
+	} 
 
 kingdom = 
 	'魏' / '蜀' / '吴' / '群'
