@@ -105,8 +105,16 @@ statement =
 		return {
 			'语句类型':'变量定义',
 			'变量名':var_name,
-			'角色':player,
+			'对象':player,
 			'属性':player_property
+		};
+	} /
+	var_name:var_name '为' '伤害点数'{
+		return {
+			'语句类型':'变量定义',
+			'变量名':var_name,
+			'对象':'此前提到的伤害',
+			'属性':'点数'
 		};
 	} /
 	original_thing:thing '视为' view_as_thing:thing{
@@ -249,7 +257,13 @@ adverbial =
 			'操作':op,
 			'增减值':x
 		};
-	} 
+	} /
+	'依次' {
+		return {
+			'状语类型':'修饰分配方式',
+			'分配方式':'依次'
+		};
+	}
 
 timespan =
 	'此回合'{
@@ -276,6 +290,12 @@ timespan =
 	}
 
 action = 
+	'观看牌堆顶' x:number '张牌'{
+		return {
+			'动作类型':'观看牌堆顶的牌',
+			'数量':x
+		};
+	} /
 	'视为' action:action{
 		return {
 			'动作类型':'视为操作',
@@ -343,7 +363,13 @@ action =
 		return {
 			"动作类型":"卡牌置入处理",
 			"目的地":destination,
-			"对象":card
+			"卡牌":card
+		};
+	} /
+	'将' card:card '任意分配' {
+		return {
+			'动作类型':'卡牌任意分配',
+			'卡牌':card
 		};
 	} /
 	buff:('多'/'少') '摸' number:number '张牌'{
@@ -378,7 +404,14 @@ action =
 			'动作类型':'弃置',
 			'弃置卡牌':card
 		};
-	} 
+	} /
+	'执行以下操作' x:number '次' statements:statements{
+		return {
+			'动作类型':'执行多次操作',
+			'次数':x,
+			'操作':statements
+		};
+	}
 
 option =
 	literal_number:literal_number "." statements:statements{
@@ -410,7 +443,10 @@ literal_number =
 	number:[一二三四五六七八九十] {
 		var numbers = "一二三四五六七八九十";
 		return numbers.indexOf(number)+1;
-	} 
+	} /
+	'两' {
+		return 2;
+	}
 
 number = 
 	literal_number /
@@ -436,7 +472,7 @@ damage =
 	}
 
 card =	
-	'之' {
+	('这些牌'/ '之') {
 		return {
 			'对象类型':'卡牌',
 			'卡牌限定':'之前提到的卡牌'
