@@ -158,8 +158,15 @@ has_card_or_not =
 	'无牌' {
 		return false;
 	}
-	
+
 if_condition =
+	'结果' compare_op:compare_op card_modifier:card_modifier {
+		return {
+			'判断类型':"判定结果判断",
+			'操作符':compare_op,
+			'修饰':card_modifier
+		};
+	} /
 	area:area has:has_card_or_not {
 		return {
 			'判断类型':'区域内容判断',
@@ -296,6 +303,18 @@ timespan =
 	}
 
 action = 
+	'对' player:player '造成' damage:damage{
+		return {
+			'动作类型':'造成伤害',
+			'目标':player,
+			'伤害':damage
+		}
+	} /
+	'判定' {
+		return {
+			'动作类型':'判定'
+		};
+	} /
 	'放弃' what:'摸牌' {
 		return {
 			'动作类型':'放弃获取资源',
@@ -397,11 +416,10 @@ action =
 			'数量':number
 		};
 	} /
-	'防止' damage:damage{
+	'防止此伤害'{
 		return {
 			'动作类型':'普通动作',
-			'动作':'防止',
-			'宾语':damage
+			'动作':'防止之前提到的伤害'
 		};
 	} /
 	'获得' object:(card / mark){
@@ -792,7 +810,7 @@ event =
 			'开始还是结束':endpoint == '' ? '开始时' : endpoint
 		};
 	} /
-	card_modifiers:card_modifier* what:('判定牌生效后' / '判定牌置入弃牌堆后' / '牌置入弃牌堆后') {
+	card_modifiers:card_modifier* what:('判定牌生效前' / '判定牌生效后' / '判定牌置入弃牌堆后' / '牌置入弃牌堆后') {
 		return {
 			'事件类型':what,
 			'判定牌修饰':card_modifiers
@@ -813,12 +831,6 @@ damage_modifier =
 		return {
 			"修饰类型":"伤害修饰",
 			"伤害点数":number
-		};
-	} /
-	'此' {
-		return {
-			"修饰类型":"伤害修饰",
-			"伤害指代":"之前提到的伤害"
 		};
 	}
 
