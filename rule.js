@@ -607,13 +607,7 @@ card_modifier =
 			'范围':'此前提到的多张牌',
 		};
 	} /
-	'其余' / 
-	'其' {
-		return {
-			'卡牌限定':'拥有者限定',
-			'拥有者':'之前提到的角色'
-		}
-	} /
+	'其余' /
 	number:number '张' {
 		return {
 			'卡牌限定':'数量限定',
@@ -638,7 +632,13 @@ card_modifier =
 			'花色':card_suit
 		};
 	} /
-	'被弃置'
+	'被弃置' /
+	player:player {
+		return {
+			'卡牌限定':'拥有者限定',
+			'拥有者':player
+		};
+	}
 
 card_suit =
 	('♠' / '黑桃') {
@@ -685,6 +685,11 @@ right_quote =
 
 // end
 player =
+	'伤害来源'{
+		return {
+			'角色':'伤害来源'
+		}
+	} /
 	you:'你' {
 		return {
 			"角色":"你"
