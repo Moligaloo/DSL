@@ -514,34 +514,39 @@ damage =
 		};
 	}
 
-card =	
+terminal_card = 
 	('这些牌'/ '之') {
 		return {
-			'对象类型':'卡牌',
 			'卡牌限定':'之前提到的卡牌'
 		}
 	} /
-	card_modifier:card_modifier* mark_name:mark_name{
-		card_modifier.unshift({
+	mark_name:mark_name{
+		return {
 			'卡牌限定':'标记',
 			'标记':mark_name
-		});
-
-		return {
-			'对象类型':'卡牌',
-			'卡牌限定':card_modifier
 		};
 	} /
 	card_name:card_name {
 		return {
-			'对象类型':'卡牌',
-			'卡牌限定':{
-				'卡牌限定':'名称限定',
-				'名称':card_name
-			}
+			'卡牌限定':'名称限定',
+			'名称':card_name
 		};
 	} /
-	card_modifier:card_modifier* card:('手牌' / '牌') second_card:second_card? {
+	'牌' {
+		return false;
+	} /
+	'手牌'{
+		return {
+			'卡牌限定':'位置限定',
+			'位置':'手牌'
+		}
+	}
+
+card =
+	card_modifier:card_modifier* terminal_card:terminal_card second_card:second_card? {
+		if(terminal_card)
+			card_modifier.push(terminal_card);
+
 		if(second_card == ''){
 			return {
 				'对象类型':'卡牌',
