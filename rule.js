@@ -303,6 +303,13 @@ timespan =
 	}
 
 action = 
+	'受到' player:player '造成' damage:damage{
+		return {
+			'动作类型':'受到伤害',
+			'伤害来源':player,
+			'伤害':damage
+		};
+	} /
 	'对' player:player '造成' damage:damage{
 		return {
 			'动作类型':'造成伤害',
@@ -703,7 +710,7 @@ right_quote =
 
 // end
 player =
-	'伤害来源'{
+	'伤害'? '来源'{
 		return {
 			'角色':'伤害来源'
 		}
