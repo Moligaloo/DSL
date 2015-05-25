@@ -6,9 +6,8 @@ json_file = 'skills.json'
 
 dict = JSON.parse(IO.read(json_file))
 
-for kingdom in dict.keys
-	generals = dict[kingdom]
-	for g in generals
+dict.each_value do |generals|
+	generals.each do |g|
 		skill_map = g['技能']
 
 		for skill_name in skill_map.keys
