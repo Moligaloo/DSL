@@ -688,8 +688,8 @@ card_color =
 	'红色' / '黑色' / '无色'
 
 card_name =
-	'【' name:[^】] '】'{
-		return name;
+	'【' name:[^】]+ '】'{
+		return name.join();
 	}
 
 punctuation =
