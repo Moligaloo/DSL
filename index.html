@@ -74,6 +74,8 @@
 
 	$.get('skills.json', function(data){
 		skillMap = {};
+		
+		console.log(data);
 
 		var skillList = $('<div>').addClass('ui-content').attr('role', 'main');
 		var table = $('<table>');
