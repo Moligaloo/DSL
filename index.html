@@ -73,10 +73,11 @@
 	});
 
 	$.get('skills.json', function(data){
+	    if(typeof(data) == 'string')
+	        data = JSON.parse(data);
+	    
 		skillMap = {};
 		
-		console.log(data);
-
 		var skillList = $('<div>').addClass('ui-content').attr('role', 'main');
 		var table = $('<table>');
 
