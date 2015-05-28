@@ -239,9 +239,13 @@
 			if('expected' in e){
 				var offset = sourceMap[e.offset];
 
-				$('#good-text').text(text.substring(0, offset));
-				$('#bad-text').text(text.substring(offset, offset+1));
-				$('#unparsed-text').text(text.substring(offset+1));
+				if(offset == undefined){
+					$('#bad-text').text('已至末尾');
+				}else{
+					$('#good-text').text(text.substring(0, offset));
+					$('#bad-text').text(text.substring(offset, offset+1));
+					$('#unparsed-text').text(text.substring(offset+1));	
+				}
 
 				var expected = $('#expected');
 				expected.empty();
