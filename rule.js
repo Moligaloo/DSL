@@ -60,7 +60,7 @@ statement_with_punc =
 	}
 
 statement =
-	'各' statement:statement{
+	'各' (& action) statement:statement{
 		return {
 			'语句类型':'循环操作',
 			'循环语句':statement
