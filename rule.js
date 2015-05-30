@@ -60,10 +60,10 @@ statement_with_punc =
 	}
 
 statement =
-	'各' (& action) statement:statement{
+	'各' action:action{
 		return {
-			'语句类型':'循环操作',
-			'循环语句':statement
+			'语句类型':'循环动作',
+			'循环动作':action
 		};
 	} /
 	left_paren statement:statement right_paren{
