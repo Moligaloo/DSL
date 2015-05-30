@@ -270,13 +270,7 @@ adverbial =
 			'操作':op,
 			'增减值':x
 		};
-	} /
-	'依次' {
-		return {
-			'状语类型':'修饰分配方式',
-			'分配方式':'依次'
-		};
-	}
+	} 
 
 timespan =
 	'此回合'{
@@ -410,10 +404,11 @@ action =
 			"卡牌":card
 		};
 	} /
-	'将' card:card '任意分配' {
+	modifier:'依次'? '将' card:card '任意分配' {
 		return {
 			'动作类型':'卡牌任意分配',
-			'卡牌':card
+			'卡牌':card,
+			'是否依次': modifier == '' ? false : true
 		};
 	} /
 	buff:('多'/'少') '摸' number:number '张牌'{
