@@ -243,21 +243,29 @@ property_value =
 		};
 	}
 
-adverbial =
-	'且' adverbial:adverbial{
-		return adverbial;
-	} /
+pre_adverbial =
 	'不能' {
 		return {
 			'状语类型':'禁止'
 		};
-	}/
+	} /
 	'于' timespan:timespan '内'{
 		return {
 			'状语类型':'时间限定',
 			'时间':timespan
 		}
-	} /
+	}
+
+post_adverbials =
+	post_adverbial:post_adverbial second_post_adverbials:second_post_adverbial*{
+		var post_adverbials = new Array();
+		post_adverbials.push(post_adverbial);
+		post_adverbials = post_adverbials.concat(second_post_adverbials);
+
+		return post_adverbials;
+	}
+
+post_adverbial =
 	'无距离限制' {
 		return {
 			'状语类型':'距离限定',
@@ -270,6 +278,11 @@ adverbial =
 			'操作':op,
 			'增减值':x
 		};
+	} 
+
+second_post_adverbial =
+	'且' post_adverbial:post_adverbial{
+		return post_adverbial;
 	} 
 
 timespan =
@@ -342,8 +355,13 @@ action =
 			'修正值':x
 		};
 	} /
-	pre_adverbial:adverbial+ action:action post_adverbial:adverbial*{
-		action['状语'] = pre_adverbial.concat(post_adverbial)
+	pre_adverbials:pre_adverbial+ action:action post_adverbials:post_adverbials?{
+		var adverbials = new Array();
+		adverbials = adverbials.concat(pre_adverbials);
+		if(post_adverbials != '')
+			adverbials = adverbials.concat(post_adverbials);
+
+		action['状语'] = adverbials;
 		return action;
 	} /
 	'回复' number:number '点体力' {
