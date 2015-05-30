@@ -272,13 +272,14 @@ post_adverbial =
 			'距离':'无限'
 		};
 	} /
-	'额外次数上限' op:number_linear_op x:number{
+	limit:('额定次数上限' / '额外次数上限') op:number_linear_op x:number{
 		return {
-			'状语类型':'额外次数上限修正',
+			'状语类型':'上限修正',
+			'上限':limit,
 			'操作':op,
 			'增减值':x
 		};
-	} 
+	} /
 
 second_post_adverbial =
 	'且' post_adverbial:post_adverbial{
@@ -347,14 +348,6 @@ action =
 			'视为操作':action
 		};
 	} /
- 	'使用' card_name:card_name '额定次数上限' op:number_linear_op x:number {
-		return {
-			'动作类型':'卡牌使用的额定次数上限修正',
-			'修正卡牌':card_name,
-			'修正符号':op,
-			'修正值':x
-		};
-	} /
 	pre_adverbials:pre_adverbial+ action:action post_adverbials:post_adverbials?{
 		var adverbials = new Array();
 		adverbials = adverbials.concat(pre_adverbials);
@@ -377,7 +370,7 @@ action =
 			'动词':'翻面'
 		};
 	} /
-	op:('使用或打出' / '使用') card:card{
+	op:('使用或打出' / '使用') card:card post_adverbials:post_adverbials?{
 		return {
 			'动作类型':"普通动作",
 			'动词':op,
