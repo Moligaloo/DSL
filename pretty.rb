@@ -8,11 +8,11 @@ dict = JSON.parse(IO.read(json_file))
 
 dict.each_value do |generals|
 	generals.each do |g|
-		skill_map = g['技能']
+		skill_map = g['skills']
 
 		for skill_name in skill_map.keys
 			skill_content = skill_map[skill_name]
-			skill_map[skill_name] = skill_content.gsub(',','，').sub(/[ ]+/,'').sub(/\n/, '')
+			skill_map[skill_name] = skill_content.gsub(',','，').delete ' '
 		end
 	end
 end

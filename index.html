@@ -86,8 +86,8 @@
 
 		for(var i=0; i< array.length; i++){
 			var general = array[i];
-			var generalName = general['武将'];
-			var generalSkills = general['技能'];
+			var generalName = general['name'];
+			var generalSkills = general['skills'];
 
 			var skillCell = $('<td>');
 			table.append($('<tr>').append($('<th>').text(generalName)).append(skillCell));
