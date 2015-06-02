@@ -123,11 +123,11 @@ statement =
 			'属性':'点数'
 		};
 	} /
-	original_thing:thing '视为' view_as_thing:thing{
+	'视为' player:player action:action{
 		return {
-			'语句类型':'视为语句',
-			'原始物件':original_thing,
-			'视为物件':view_as_thing
+			'语句类型': '视为动作',
+			'对象': player,
+			'动作': action
 		};
 	} /
 	'若如此做' {
@@ -139,9 +139,6 @@ statement =
 			'标记名':mark_name
 		};
 	}
-
-thing =
-	'其打出【闪】结算完毕后' / '你使用/打出此【闪】'
 
 distance_modify =
 	sign:[+-] number:number {
@@ -280,6 +277,12 @@ post_adverbial =
 			'增减值':x
 		};
 	} /
+	'结算完毕后' {
+		return {
+			'状语类型':'时间限定',
+			'限定':'结算完毕后'
+		};
+	}
 
 second_post_adverbial =
 	'且' post_adverbial:post_adverbial{
@@ -370,11 +373,18 @@ action =
 			'动词':'翻面'
 		};
 	} /
-	op:('使用或打出' / '使用') card:card post_adverbials:post_adverbials?{
+	'打出' card:card card_usage:card_usage{
 		return {
-			'动作类型':"普通动作",
-			'动词':op,
-			'宾语':card
+			'动作类型':'打出卡牌',
+			'卡牌':card,
+			'作用':card_usage
+		}
+	} /
+	op:('使用/打出' / '使用或打出' / '使用' / '打出') card:card post_adverbials:post_adverbials?{
+		return {
+			'动作类型':"卡牌操作",
+			'操作':op,
+			'卡牌':card
 		};
 	} /
 	'令' player:player action:action{
@@ -459,6 +469,14 @@ action =
 			'动作类型':'执行多次操作',
 			'次数':x,
 			'操作':statements
+		};
+	}
+
+card_usage =
+	'代替' card:card{
+		return {
+			'卡牌作用':'代替卡牌',
+			'卡牌':card
 		};
 	}
 
@@ -674,7 +692,8 @@ card_modifier =
 			'卡牌限定':'拥有者限定',
 			'拥有者':player
 		};
-	}
+	} /
+	'此'
 
 card_suit =
 	('♠' / '黑桃') {
