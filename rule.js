@@ -539,11 +539,6 @@ damage =
 	}
 
 terminal_card = 
-	('这些牌'/ '之') {
-		return {
-			'卡牌限定':'之前提到的卡牌'
-		}
-	} /
 	mark_name:mark_name{
 		return {
 			'卡牌限定':'标记',
@@ -567,7 +562,12 @@ terminal_card =
 	}
 
 card =
-	card_modifier:card_modifier* terminal_card:terminal_card second_card:second_card? {
+	'之' {
+		return {
+			'卡牌限定':'之前提到的卡牌'
+		}
+	} /
+ 	card_modifier:card_modifier* terminal_card:terminal_card second_card:second_card? {
 		if(terminal_card)
 			card_modifier.push(terminal_card);
 
