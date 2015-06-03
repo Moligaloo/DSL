@@ -1,6 +1,6 @@
 
-var SemanticParser = function(){
-
+var SemanticParser = function(raw){
+	this.result = this.parse(raw);
 }
 
 SemanticParser.prototype.parse = function(raw) {

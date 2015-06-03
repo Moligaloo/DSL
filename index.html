@@ -234,8 +234,8 @@
 
 			var raw = parser.parse(preprocess(text));
 
-			var semanticParser = new SemanticParser();
-			result = semanticParser.parse(raw);
+			var semanticParser = new SemanticParser(raw);
+			result = semanticParser.result;
 
 			showTable();
 
